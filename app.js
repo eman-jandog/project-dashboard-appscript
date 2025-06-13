@@ -84,12 +84,18 @@ class App {
     }
 }
 
-function include(filename) {
-    return HtmlService.createTemplateFromFile(filename).evaluate().getContent()
+function importJS(filename) {
+    const js = HtmlService.createTemplateFromFile(filename).evaluate().getContent()
+    return <script>js</script>
+}
+
+function importCSS(filename) {
+    const css = HtmlService.createTemplateFromFile(filename).evaluate().getContent()
+    return <style>css</style>
 }
 
 function doGet() {
-    return HtmlService.createTemplateFromFile("index")
+    return HtmlService.createTemplateFromFile("/templates/index")
         .evaluate()
         .setTitle("Project Dashboard")
         .addMetaTag("viewport", "width=device-width, initial-scale=1.0")
@@ -112,7 +118,7 @@ function getDashboardRefreshRate() {
 
 //CUSTOM SHEET UIs
 function report() {
-  var html = HtmlService.createHtmlOutputFromFile('ui/report_dialog')
+  var html = HtmlService.createHtmlOutputFromFile('templates/report_dialog')
     .setWidth(400) // Set dialog width
     .setHeight(300); // Set dialog height
   SpreadsheetApp.getUi().showModalDialog(html, 'Project Report');

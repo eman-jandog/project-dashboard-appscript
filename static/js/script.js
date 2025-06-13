@@ -1,4 +1,3 @@
-<script>
 const app = document.getElementById("app")
 app.innerHTML = `
 <div class="text-muted">
@@ -24,7 +23,7 @@ getData()
 load()
 
 
-function reload(){
+function reload() {
   document.getElementById("refresh-time").innerHTML = `
   <div class="text-muted">
   <div class="spinner-grow spinner-grow-sm text-muted" role="status">
@@ -32,7 +31,7 @@ function reload(){
   <span>Refreshing...</span>
   </div>
   `
-  load()
+  load();
 }
 
 
@@ -179,6 +178,3 @@ window.onresize = function(event) {
   if(tableContainer)
     reloadSlider();
 };
-
-
-</script>
