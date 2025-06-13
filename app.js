@@ -84,18 +84,13 @@ class App {
     }
 }
 
-function importJS(filename) {
-    const js = HtmlService.createTemplateFromFile(filename).evaluate().getContent()
-    return <script>js</script>
+function include(filename) {
+    return HtmlService.createTemplateFromFile(filename).evaluate().getContent()
 }
 
-function importCSS(filename) {
-    const css = HtmlService.createTemplateFromFile(filename).evaluate().getContent()
-    return <style>css</style>
-}
 
 function doGet() {
-    return HtmlService.createTemplateFromFile("/templates/index")
+    return HtmlService.createTemplateFromFile('templates/index')
         .evaluate()
         .setTitle("Project Dashboard")
         .addMetaTag("viewport", "width=device-width, initial-scale=1.0")
