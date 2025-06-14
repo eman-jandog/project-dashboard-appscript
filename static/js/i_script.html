@@ -1,0 +1,817 @@
+<script>
+    // Sample data
+    const projects = [
+        {
+            id: 1,
+            name: "Residential Complex",
+            client: "Horizon Developers",
+            status: "On Track",
+            progress: 75,
+            deadline: "2023-12-15",
+            description: "A luxury residential complex with 200 apartments, swimming pool, and fitness center.",
+            lastUpdate: "2023-06-10",
+            budget: "$15.2M",
+            team: "Team Alpha",
+            location: "Downtown"
+        },
+        {
+            id: 2,
+            name: "Office Tower",
+            client: "Metro Business Group",
+            status: "Delayed",
+            progress: 45,
+            deadline: "2023-10-30",
+            description: "A 30-story office tower with modern amenities and underground parking.",
+            lastUpdate: "2023-06-08",
+            budget: "$28.5M",
+            team: "Team Beta",
+            location: "Financial District"
+        },
+        {
+            id: 3,
+            name: "Shopping Mall",
+            client: "Retail Ventures Inc.",
+            status: "On Track",
+            progress: 90,
+            deadline: "2023-08-20",
+            description: "A three-level shopping mall with 100 retail spaces and food court.",
+            lastUpdate: "2023-06-12 ",
+            budget: "$22.7M",
+            team: "Team Gamma",
+            location: "Suburban Area"
+        },
+        {
+            id: 4,
+            name: "Hospital Wing",
+            client: "City Health Department",
+            status: "Delayed",
+            progress: 30,
+            deadline: "2024-02-28",
+            description: "A new hospital wing with 50 patient rooms and advanced medical facilities.",
+            lastUpdate: "2023-06-05",
+            budget: "$35.1M",
+            team: "Team Delta",
+            location: "Medical District"
+        },
+        {
+            id: 5,
+            name: "Highway Extension",
+            client: "State Transportation Authority",
+            status: "On Track",
+            progress: 60,
+            deadline: "2023-11-15",
+            description: "A 15-mile highway extension with bridges and rest areas.",
+            lastUpdate: "2023-06-11",
+            budget: "$42.8M",
+            team: "Team Epsilon",
+            location: "Northern Region"
+        },
+        {
+            id: 6,
+            name: "Public Library",
+            client: "City Education Board",
+            status: "Completed",
+            progress: 100,
+            deadline: "2023-05-30",
+            description: "A modern public library with digital resources and community spaces.",
+            lastUpdate: "2023-05-30",
+            budget: "$8.5M",
+            team: "Team Zeta",
+            location: "City Center"
+        },
+        {
+            id: 7,
+            name: "Sports Stadium",
+            client: "Regional Sports Authority",
+            status: "On Track",
+            progress: 65,
+            deadline: "2024-01-20",
+            description: "A multi-purpose sports stadium with seating capacity of 35,000.",
+            lastUpdate: "2023-06-09",
+            budget: "$55.3M",
+            team: "Team Eta",
+            location: "Sports Complex"
+        },
+        {
+            id: 8,
+            name: "Waterfront Park",
+            client: "City Parks Department",
+            status: "Completed",
+            progress: 100,
+            deadline: "2023-04-15",
+            description: "A waterfront park with walking trails, playgrounds, and amphitheater.",
+            lastUpdate: "2023-04-15",
+            budget: "$6.2M",
+            team: "Team Theta",
+            location: "Riverside"
+        },
+        {
+            id: 9,
+            name: "University Campus",
+            client: "State University",
+            status: "On Track",
+            progress: 80,
+            deadline: "2023-09-10",
+            description: "A new university campus with academic buildings, dormitories, and recreational facilities.",
+            lastUpdate: "2023-06-07",
+            budget: "$48.9M",
+            team: "Team Iota",
+            location: "University District"
+        },
+        {
+            id: 10,
+            name: "Hotel Resort",
+            client: "Luxury Hospitality Group",
+            status: "Delayed",
+            progress: 50,
+            deadline: "2023-12-01",
+            description: "A beachfront hotel resort with 300 rooms, restaurants, and spa facilities.",
+            lastUpdate: "2023-06-06",
+            budget: "$32.4M",
+            team: "Team Kappa",
+            location: "Coastal Area"
+        }
+    ];
+
+
+    // DOM elements
+    const projectsTableBody = document.getElementById('projectsTableBody');
+    const recentUpdates = document.getElementById('recentUpdates');
+    const projectModal = document.getElementById('projectModal');
+    const closeModal = document.getElementById('closeModal');
+    const projectForm = document.getElementById('projectForm');
+    const deleteProject = document.getElementById('deleteProject');
+    const cancelEdit = document.getElementById('cancelEdit');
+    const filterActive = document.getElementById('filterActive');
+    const filterCompleted = document.getElementById('filterCompleted');
+    const presentationBtn = document.getElementById('presentationBtn');
+    const presentationMode = document.getElementById('presentationMode');
+    const exitPresentation = document.getElementById('exitPresentation');
+    const slideContainer = document.getElementById('slideContainer');
+    const slideIndicators = document.getElementById('slideIndicators');
+    const progressRange = document.getElementById('projectProgress');
+    const progressValue = document.getElementById('progressValue');
+    const prevSlide = document.getElementById('prevSlide');
+    const nextSlide = document.getElementById('nextSlide');
+    const slideCounter = document.getElementById('slideCounter');
+    const presentationProgress = document.getElementById('presentationProgress');
+
+    // Update dashboard stats and project summary
+    function updateDashboardStats() {
+        const total = projects.length;
+        const onTrack = projects.filter(p => p.status === 'On Track').length;
+        const delayed = projects.filter(p => p.status === 'Delayed').length;
+        const completed = projects.filter(p => p.status === 'Completed').length;
+
+        // Update header cards
+        document.getElementById('totalProjects').textContent = total;
+        document.getElementById('onTrackProjects').textContent = onTrack;
+        document.getElementById('delayedProjects').textContent = delayed;
+        document.getElementById('completedProjects').textContent = completed;
+
+        // Update bar chart
+        updateBarChart(onTrack, delayed, completed);
+        
+        // Update project status summary
+        updateProjectSummary(onTrack, delayed, completed, total);
+    }
+
+    // Update project status summary with circular progress
+    function updateProjectSummary(onTrack, delayed, completed, total) {
+        // Calculate percentages
+        const onTrackPercent = Math.round((onTrack / total) * 100);
+        const delayedPercent = Math.round((delayed / total) * 100);
+        const completedPercent = Math.round((completed / total) * 100);
+        
+        // Update text displays
+        document.getElementById('onTrackPercentage').textContent = `${onTrackPercent}%`;
+        document.getElementById('delayedPercentage').textContent = `${delayedPercent}%`;
+        document.getElementById('completedPercentage').textContent = `${completedPercent}%`;
+        
+        document.getElementById('onTrackCount').textContent = `${onTrack} project${onTrack !== 1 ? 's' : ''}`;
+        document.getElementById('delayedCount').textContent = `${delayed} project${delayed !== 1 ? 's' : ''}`;
+        document.getElementById('completedCount').textContent = `${completed} project${completed !== 1 ? 's' : ''}`;
+        
+        // Update circular progress bars
+        // The stroke-dasharray is set to 283 (2 * PI * 45) in CSS
+        // We calculate the stroke-dashoffset based on the percentage
+        const onTrackOffset = 283 - (283 * onTrackPercent / 100);
+        const delayedOffset = 283 - (283 * delayedPercent / 100);
+        const completedOffset = 283 - (283 * completedPercent / 100);
+        
+        document.getElementById('onTrackCircle').style.strokeDashoffset = onTrackOffset;
+        document.getElementById('delayedCircle').style.strokeDashoffset = delayedOffset;
+        document.getElementById('completedCircle').style.strokeDashoffset = completedOffset;
+        
+        // Calculate overall progress
+        const totalProgress = projects.reduce((sum, project) => sum + project.progress, 0);
+        const overallProgress = Math.round(totalProgress / (total * 100) * 100);
+        
+        document.getElementById('overallProgressBar').style.width = `${overallProgress}%`;
+        document.getElementById('overallProgressPercentage').textContent = `${overallProgress}%`;
+    }
+
+    // Initialize bar chart
+    function initBarChart() {
+        const ctx = document.getElementById('barChart').getContext('2d');
+        window.barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['On Track', 'Delayed', 'Completed'],
+                datasets: [{
+                    label: 'Number of Projects',
+                    data: [0, 0, 0],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(139, 92, 246, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(139, 92, 246, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Update bar chart data
+    function updateBarChart(onTrack, delayed, completed) {
+        window.barChart.data.datasets[0].data = [onTrack, delayed, completed];
+        window.barChart.update();
+    }
+
+    // Render projects table
+    function renderProjectsTable(filter = 'active') {
+        projectsTableBody.innerHTML = '';
+        
+        const filteredProjects = filter === 'active' 
+            ? projects.filter(p => p.status !== 'Completed')
+            : projects.filter(p => p.status === 'Completed');
+        
+        filteredProjects.forEach(project => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 cursor-pointer';
+            row.onclick = () => openProjectModal(project.id);
+            
+            const statusColor = project.status === 'On Track' ? 'bg-green-100 text-green-800' : 
+                                project.status === 'Delayed' ? 'bg-amber-100 text-amber-800' : 
+                                'bg-purple-100 text-purple-800';
+            
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="font-medium text-gray-900">${project.name}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-500">${project.client}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusColor}">
+                        ${project.status}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${project.progress}%"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">${project.progress}%</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-500">${formatDate(project.deadline)}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <button class="text-blue-600 hover:text-blue-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                </td>
+            `;
+            
+            projectsTableBody.appendChild(row);
+        });
+    }
+
+    // Render recent updates as cards
+    function renderRecentUpdates() {
+        recentUpdates.innerHTML = '';
+        
+        // Sort projects by last update date (descending)
+        const sortedProjects = [...projects].sort((a, b) => 
+            new Date(b.lastUpdate) - new Date(a.lastUpdate)
+        ).slice(0, 6); // Get only the 6 most recent
+        
+        sortedProjects.forEach(project => {
+            const card = document.createElement('div');
+            card.className = 'bg-gray-50 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow';
+            
+            const statusColor = project.status === 'On Track' ? 'bg-green-100 text-green-800' : 
+                                project.status === 'Delayed' ? 'bg-amber-100 text-amber-800' : 
+                                'bg-purple-100 text-purple-800';
+            
+            card.innerHTML = `
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-medium text-gray-800">${project.name}</h4>
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusColor}">
+                        ${project.status}
+                    </span>
+                </div>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">${project.description}</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Updated on ${formatDate(project.lastUpdate)}</span>
+                    <span class="text-xs font-medium text-blue-600 cursor-pointer" onclick="openProjectModal(${project.id})">View Details</span>
+                </div>
+            `;
+            
+            recentUpdates.appendChild(card);
+        });
+    }
+
+    // Open project modal
+    function openProjectModal(projectId) {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+        
+        document.getElementById('projectId').value = project.id;
+        document.getElementById('projectName').value = project.name;
+        document.getElementById('clientName').value = project.client;
+        document.getElementById('projectStatus').value = project.status;
+        document.getElementById('projectDeadline').value = project.deadline;
+        document.getElementById('projectProgress').value = project.progress;
+        document.getElementById('progressValue').textContent = `${project.progress}%`;
+        document.getElementById('projectDescription').value = project.description;
+        
+        projectModal.classList.remove('hidden');
+    }
+
+    // Close project modal
+    function closeProjectModal() {
+        projectModal.classList.add('hidden');
+    }
+
+    // Format date
+    function formatDate(dateString) {
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+
+    // Initialize presentation mode with professional design and tables
+    function initPresentationMode() {
+        slideContainer.innerHTML = '';
+        slideIndicators.innerHTML = '';
+        
+        const totalSlides = projects.length + 1; // +1 for title slide
+        
+        // Add title slide
+        const titleSlide = document.createElement('div');
+        titleSlide.className = 'slide flex-shrink-0 w-full h-full flex items-center justify-center presentation-slide';
+        
+        // Get project stats for the title slide
+        const onTrack = projects.filter(p => p.status === 'On Track').length;
+        const delayed = projects.filter(p => p.status === 'Delayed').length;
+        const completed = projects.filter(p => p.status === 'Completed').length;
+        const total = projects.length;
+        
+        // Calculate overall progress for title slide
+        const totalProgress = projects.reduce((sum, project) => sum + project.progress, 0);
+        const overallProgress = Math.round(totalProgress / (total * 100) * 100);
+        
+        titleSlide.innerHTML = `
+            <div class="text-center px-8 max-w-5xl mx-auto">
+                <h1 class="text-5xl font-bold mb-6">ARAC Construction Projects</h1>
+                <p class="text-xl mb-12 text-blue-200">Project Status Overview - ${new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}</p>
+                
+                <div class="grid grid-cols-4 gap-8 max-w-4xl mx-auto mb-12">
+                    <div class="bg-white bg-opacity-10 p-6 rounded-lg shadow-lg transform transition-transform hover:scale-105">
+                        <div class="text-4xl font-bold mb-2">${total}</div>
+                        <div class="text-sm text-blue-200">Total Projects</div>
+                    </div>
+                    <div class="bg-green-500 bg-opacity-20 p-6 rounded-lg shadow-lg transform transition-transform hover:scale-105">
+                        <div class="text-4xl font-bold mb-2">${onTrack}</div>
+                        <div class="text-sm text-green-300">On Track</div>
+                    </div>
+                    <div class="bg-amber-500 bg-opacity-20 p-6 rounded-lg shadow-lg transform transition-transform hover:scale-105">
+                        <div class="text-4xl font-bold mb-2">${delayed}</div>
+                        <div class="text-sm text-amber-300">Delayed</div>
+                    </div>
+                    <div class="bg-purple-500 bg-opacity-20 p-6 rounded-lg shadow-lg transform transition-transform hover:scale-105">
+                        <div class="text-4xl font-bold mb-2">${completed}</div>
+                        <div class="text-sm text-purple-300">Completed</div>
+                    </div>
+                </div>
+                
+                <div class="bg-white bg-opacity-10 p-6 rounded-lg shadow-lg max-w-2xl mx-auto">
+                    <h3 class="text-xl font-semibold mb-4">Overall Project Progress</h3>
+                    <div class="w-full bg-white bg-opacity-10 rounded-full h-6 mb-2">
+                        <div class="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-3" style="width: ${overallProgress}%">
+                            <span class="text-xs font-bold">${overallProgress}%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-12 text-blue-200 text-sm">
+                    <p>Use arrow keys or drag to navigate through slides</p>
+                </div>
+            </div>
+        `;
+        
+        slideContainer.appendChild(titleSlide);
+        
+        // Add indicator for title slide
+        const titleIndicator = document.createElement('button');
+        titleIndicator.className = 'w-3 h-3 rounded-full bg-white bg-opacity-50 slide-indicator';
+        titleIndicator.dataset.slideIndex = 0;
+        titleIndicator.onclick = () => goToSlide(0);
+        slideIndicators.appendChild(titleIndicator);
+        
+        // Add project slides
+        projects.forEach((project, index) => {
+            // Create slide
+            const slide = document.createElement('div');
+            slide.className = 'slide flex-shrink-0 w-full h-full flex items-center justify-center presentation-slide';
+            
+            const statusColor = project.status === 'On Track' ? 'bg-green-500' : 
+                                project.status === 'Delayed' ? 'bg-amber-500' : 
+                                'bg-purple-500';
+            
+            slide.innerHTML = `
+                <div class="max-w-5xl w-full mx-8">
+                    <div class="mb-8">
+                        <h2 class="text-3xl font-bold mb-2">${project.name}</h2>
+                        <p class="text-lg text-blue-200">Client: ${project.client}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div class="bg-white bg-opacity-5 p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-semibold mb-4 text-blue-200">Project Details</h3>
+                            <table class="w-full presentation-table">
+                                <tr>
+                                    <th>Status</th>
+                                    <td><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusColor} bg-opacity-20">${project.status}</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Deadline</th>
+                                    <td>${formatDate(project.deadline)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Budget</th>
+                                    <td>${project.budget}</td>
+                                </tr>
+                                <tr>
+                                    <th>Team</th>
+                                    <td>${project.team}</td>
+                                </tr>
+                                <tr>
+                                    <th>Location</th>
+                                    <td>${project.location}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="bg-white bg-opacity-5 p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-semibold mb-4 text-blue-200">Project Progress</h3>
+                            <div class="mb-4">
+                                <div class="w-full bg-white bg-opacity-10 rounded-full h-4 mb-2">
+                                    <div class="bg-blue-500 h-4 rounded-full" style="width: ${project.progress}%"></div>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>0%</span>
+                                    <span>${project.progress}% Complete</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white bg-opacity-10 p-4 rounded-lg mt-6">
+                                <h4 class="font-medium mb-2">Description</h4>
+                                <p class="text-sm">${project.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 text-sm text-blue-200 text-right">
+                        Last updated: ${formatDate(project.lastUpdate)}
+                    </div>
+                </div>
+            `;
+            
+            slideContainer.appendChild(slide);
+            
+            // Create indicator
+            const indicator = document.createElement('button');
+            indicator.className = 'w-3 h-3 rounded-full bg-white bg-opacity-50 slide-indicator';
+            indicator.dataset.slideIndex = index + 1;
+            indicator.onclick = () => goToSlide(index + 1);
+            slideIndicators.appendChild(indicator);
+        });
+        
+        // Set first indicator as active
+        if (slideIndicators.firstChild) {
+            slideIndicators.firstChild.classList.add('active', 'bg-opacity-100');
+        }
+        
+        // Update slide counter
+        updateSlideCounter(0, totalSlides);
+        
+        // Update progress bar
+        updateProgressBar(0, totalSlides);
+        
+        presentationMode.classList.remove('hidden');
+        
+        // Initialize drag functionality
+        initDragSlides();
+    }
+
+    // Presentation navigation
+    let currentSlide = 0;
+    let autoplayTimer = null;
+
+    function goToSlide(index) {
+        const totalSlides = projects.length + 1;
+        
+        // Ensure index is within bounds
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        
+        currentSlide = index;
+        
+        // Update slide position
+        slideContainer.style.transform = `translateX(-${index * 100}%)`;
+        
+        // Update indicators
+        Array.from(slideIndicators.children).forEach((indicator, i) => {
+            if (i === index) {
+                indicator.classList.add('active', 'bg-opacity-100');
+                indicator.classList.remove('bg-opacity-50');
+            } else {
+                indicator.classList.remove('active', 'bg-opacity-100');
+                indicator.classList.add('bg-opacity-50');
+            }
+        });
+        
+        // Update slide counter
+        updateSlideCounter(index, totalSlides);
+        
+        // Update progress bar
+        updateProgressBar(index, totalSlides);
+        
+        // Reset autoplay timer
+        resetAutoplayTimer();
+    }
+
+    function updateSlideCounter(current, total) {
+        slideCounter.textContent = `${current + 1}/${total}`;
+    }
+
+    function updateProgressBar(current, total) {
+        const percentage = ((current + 1) / total) * 100;
+        presentationProgress.style.width = `${percentage}%`;
+    }
+
+    function resetAutoplayTimer() {
+        if (autoplayTimer) {
+            clearTimeout(autoplayTimer);
+        }
+        
+        autoplayTimer = setTimeout(() => {
+            const totalSlides = projects.length + 1;
+            const nextIndex = (currentSlide + 1) % totalSlides;
+            goToSlide(nextIndex);
+        }, 8000); // Change slide every 8 seconds
+    }
+
+    // Initialize drag functionality for slides
+    function initDragSlides() {
+        const slidesContainer = document.getElementById('slideContainer');
+        let isDragging = false;
+        let startPos = 0;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+        let animationID = 0;
+        const totalSlides = projects.length + 1;
+        
+        function getPositionX(event) {
+            return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+        }
+        
+        function setSliderPosition() {
+            slidesContainer.style.transform = `translateX(${currentTranslate}px)`;
+        }
+        
+        function animation() {
+            setSliderPosition();
+            if (isDragging) requestAnimationFrame(animation);
+        }
+        
+        function touchStart(event) {
+            isDragging = true;
+            startPos = getPositionX(event);
+            animationID = requestAnimationFrame(animation);
+            slidesContainer.style.cursor = 'grabbing';
+            slidesContainer.style.transition = 'none';
+            
+            // Pause autoplay while dragging
+            if (autoplayTimer) {
+                clearTimeout(autoplayTimer);
+            }
+        }
+        
+        function touchMove(event) {
+            if (isDragging) {
+                const currentPosition = getPositionX(event);
+                currentTranslate = prevTranslate + currentPosition - startPos;
+            }
+        }
+        
+        function touchEnd() {
+            isDragging = false;
+            cancelAnimationFrame(animationID);
+            slidesContainer.style.cursor = 'grab';
+            
+            const movedBy = currentTranslate - prevTranslate;
+            const slideWidth = slidesContainer.clientWidth;
+            
+            // Determine if slide should change based on drag distance
+            if (Math.abs(movedBy) > slideWidth / 4) {
+                if (movedBy > 0) {
+                    // Dragged right - go to previous slide
+                    goToSlide(currentSlide - 1);
+                } else {
+                    // Dragged left - go to next slide
+                    goToSlide(currentSlide + 1);
+                }
+            } else {
+                // Return to current slide
+                goToSlide(currentSlide);
+            }
+            
+            slidesContainer.style.transition = 'transform 0.5s ease-out';
+            
+            // Reset autoplay
+            resetAutoplayTimer();
+        }
+        
+        // Event listeners for mouse and touch events
+        slidesContainer.addEventListener('mousedown', touchStart);
+        slidesContainer.addEventListener('touchstart', touchStart);
+        
+        slidesContainer.addEventListener('mousemove', touchMove);
+        slidesContainer.addEventListener('touchmove', touchMove);
+        
+        slidesContainer.addEventListener('mouseup', touchEnd);
+        slidesContainer.addEventListener('touchend', touchEnd);
+        slidesContainer.addEventListener('mouseleave', touchEnd);
+        
+        // Prevent context menu on right click
+        slidesContainer.addEventListener('contextmenu', e => e.preventDefault());
+        
+        // Update prevTranslate when slide changes
+        const observer = new MutationObserver(() => {
+            prevTranslate = -currentSlide * slidesContainer.clientWidth;
+            currentTranslate = prevTranslate;
+        });
+        
+        observer.observe(slidesContainer, { attributes: true, attributeFilter: ['style'] });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            prevTranslate = -currentSlide * slidesContainer.clientWidth;
+            currentTranslate = prevTranslate;
+            slidesContainer.style.transition = 'none';
+            setSliderPosition();
+            setTimeout(() => {
+                slidesContainer.style.transition = 'transform 0.5s ease-out';
+            }, 50);
+        });
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            google.script.run.withSuccessHandler(
+                d => console.log(d)
+            ).withFailureHandler(
+                e => console.error('Fetch: ', e)
+            ).getDashboardData();
+        } catch (e) {
+            console.error('Catch: ', e)
+        }
+
+        // Initialize circular progress bars
+        document.querySelectorAll('.circular-progress .progress').forEach(circle => {
+            circle.style.strokeDasharray = 283; // 2 * PI * 45
+            circle.style.strokeDashoffset = 283; // Start at 0%
+        });
+        
+        initBarChart();
+        updateDashboardStats();
+        renderProjectsTable('active');
+        renderRecentUpdates();
+        
+        // Filter buttons
+        filterActive.addEventListener('click', () => {
+            filterActive.classList.remove('bg-gray-200', 'text-gray-700');
+            filterActive.classList.add('bg-blue-600', 'text-white');
+            filterCompleted.classList.remove('bg-blue-600', 'text-white');
+            filterCompleted.classList.add('bg-gray-200', 'text-gray-700');
+            renderProjectsTable('active');
+        });
+        
+        filterCompleted.addEventListener('click', () => {
+            filterCompleted.classList.remove('bg-gray-200', 'text-gray-700');
+            filterCompleted.classList.add('bg-blue-600', 'text-white');
+            filterActive.classList.remove('bg-blue-600', 'text-white');
+            filterActive.classList.add('bg-gray-200', 'text-gray-700');
+            renderProjectsTable('completed');
+        });
+        
+        // Modal events
+        closeModal.addEventListener('click', closeProjectModal);
+        cancelEdit.addEventListener('click', closeProjectModal);
+        
+        // Form submission
+        projectForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const projectId = parseInt(document.getElementById('projectId').value);
+            const projectIndex = projects.findIndex(p => p.id === projectId);
+            
+            if (projectIndex !== -1) {
+                projects[projectIndex] = {
+                    ...projects[projectIndex],
+                    name: document.getElementById('projectName').value,
+                    client: document.getElementById('clientName').value,
+                    status: document.getElementById('projectStatus').value,
+                    progress: parseInt(document.getElementById('projectProgress').value),
+                    deadline: document.getElementById('projectDeadline').value,
+                    description: document.getElementById('projectDescription').value,
+                    lastUpdate: new Date().toISOString().split('T')[0]
+                };
+                
+                updateDashboardStats();
+                renderProjectsTable(filterActive.classList.contains('bg-blue-600') ? 'active' : 'completed');
+                renderRecentUpdates();
+                closeProjectModal();
+            }
+        });
+        
+        // Delete project
+        deleteProject.addEventListener('click', () => {
+            const projectId = parseInt(document.getElementById('projectId').value);
+            const projectIndex = projects.findIndex(p => p.id === projectId);
+            
+            if (projectIndex !== -1) {
+                if (confirm('Are you sure you want to delete this project?')) {
+                    projects.splice(projectIndex, 1);
+                    updateDashboardStats();
+                    renderProjectsTable(filterActive.classList.contains('bg-blue-600') ? 'active' : 'completed');
+                    renderRecentUpdates();
+                    closeProjectModal();
+                }
+            }
+        });
+        
+        // Progress range input
+        progressRange.addEventListener('input', () => {
+            progressValue.textContent = `${progressRange.value}%`;
+        });
+        
+        // Presentation mode
+        presentationBtn.addEventListener('click', initPresentationMode);
+        exitPresentation.addEventListener('click', () => {
+            presentationMode.classList.add('hidden');
+            if (autoplayTimer) {
+                clearTimeout(autoplayTimer);
+            }
+            currentSlide = 0;
+        });
+        
+        // Presentation navigation
+        prevSlide.addEventListener('click', () => goToSlide(currentSlide - 1));
+        nextSlide.addEventListener('click', () => goToSlide(currentSlide + 1));
+        
+        // Keyboard navigation for presentation
+        document.addEventListener('keydown', (e) => {
+            if (presentationMode.classList.contains('hidden')) return;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                goToSlide(currentSlide - 1);
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                goToSlide(currentSlide + 1);
+                e.preventDefault();
+            } else if (e.key === 'Escape') {
+                exitPresentation.click();
+            }
+        });
+    });
+</script>
