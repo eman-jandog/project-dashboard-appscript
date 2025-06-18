@@ -1,56 +1,76 @@
-const SN_DASHBOARD = "Overview"
+const WORKSHEET = PropertiesService.getScriptProperties().getProperty('dbsheet') 
 
 class App {
     constructor() {
-        this.ws = SpreadsheetApp.openById('1nJ77vTuO7kM8OFqCXL3l3PPfcRcXdpGWrU7nz-G-xWo').getSheetByName(SN_DASHBOARD);
+        this.ws = SpreadsheetApp.openById(WORKSHEET)
     }
 
-    getDashboardData() {
-        const data = this.ws.getDataRange().getValues();
-        const headers = data.splice(0,1)[0];
+    getProjectsData() {
+      const sheets = this.ws.getSheets();
+      const projects = [];
+      for (const sheet of sheets) {
+        const sheetName = sheet.getSheetName();
+        const name = sheet.getRange('A1').getValue();
+        const description = sheet.getRange('A2').getValue();
+        const id = sheet.getRange('B4').getValue();
+        const deadline = sheet.getRange('B5').getValue().toLocaleString('en-PH',{year: 'numeric', month: 'numeric', day: 'numeric'});
+        const location = sheet.getRange('D4').getValue();
+        const status = sheet.getRange('D5').getValue();
 
-        // create a json file
-        return data.map(row => {
-          const project = {}
-          headers.forEach((key, i) => {
-            let value = row[i];
-            key = key.toLowerCase();
+        const pt = sheet.getDataRange().getValues();
+        const headers = [];
+        for (const cell of pt[6]) {
+          if (cell == "-") break
+          else headers.push(cell);
+        }
 
-            if (key.includes(' ')) {
-              key = key.split(' ').join('')
-            }
+        const values = []
+        for (let i=7; i<pt.length; i++) {
+          const row = pt[i];
+          values.push(row.filter((item,i) => i < headers.length))
+        }
 
-            if (value instanceof Date) {
-              value = value.toString()
-            }
+        const sheetData = {
+          id: id,
+          name: name,
+          description: description,
+          deadline:  deadline,
+          location: location,
+          status: status,
+          projectData: {
+            headers: headers,
+            values: values
+          }
+        }
 
-            project[key] = value
-          })
-          return project;
-        })
+        projects.push(sheetData);
+      }
+
+      return projects;
     }
 }
 
 function getDashboardData() {
     const app = new App()
-    const data = app.getDashboardData()
+    const data = app.getProjectsData()
     return {projects: data}
 }
 
 
+//Front-End Functions
 function include(filename) {
     return HtmlService.createTemplateFromFile(filename).evaluate().getContent()
 }
 
 function doGet() {
-    return HtmlService.createTemplateFromFile('templates/main')
+    return HtmlService.createTemplateFromFile('templates/index')
         .evaluate()
         .setTitle("ARAC Project Dashboard")
         .addMetaTag("viewport", "width=device-width, initial-scale=1.0")
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
 }
 
-//CUSTOM SHEET UIs
+//Custom Functions
 function report() {
   var html = HtmlService.createHtmlOutputFromFile('templates/report_dialog')
     .setWidth(400) // Set dialog width

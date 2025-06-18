@@ -1,0 +1,505 @@
+<script>
+// Dashboard Functionality
+const slides = document.querySelectorAll('.slide');
+const progressBars = document.querySelectorAll('.progress');
+const pauseBtn = document.getElementById('pauseBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const slideIndicator = document.getElementById('slideIndicator');
+const fullscreenMessage = document.getElementById('fullscreenMessage');
+const presentationToggle = document.getElementById('presentationToggle');
+const exitPresentation = document.getElementById('exitPresentation');
+const projectCards = document.querySelectorAll('.project-card');
+
+let currentSlide = 0;
+let slideDuration = 15000; // 15 seconds per slide
+let slideInterval;
+let isPaused = false;
+
+// Set up progress rings
+function setProgressRing(id, percentage) {
+    const circle = document.getElementById(id);
+    const radius = circle.r.baseVal.value;
+    const circumference = radius * 2 * Math.PI;
+    
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    const offset = circumference - (percentage / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+}
+
+// Initialize progress rings
+setProgressRing('progress-ring-1', 42);
+setProgressRing('progress-ring-2', 35);
+setProgressRing('progress-ring-3', 28);
+
+// Create slide indicators
+slides.forEach((_, index) => {
+    const indicator = document.createElement('div');
+    indicator.classList.add('indicator');
+    if (index === 0) indicator.classList.add('active');
+    indicator.addEventListener('click', () => goToSlide(index));
+    slideIndicator.appendChild(indicator);
+});
+
+// Toggle presentation mode
+presentationToggle.addEventListener('click', () => {
+    document.body.classList.add('presentation-mode');
+    showSlide(0);
+    startSlideshow();
+    
+    // Show fullscreen message
+    fullscreenMessage.classList.add('show');
+    setTimeout(() => {
+        fullscreenMessage.classList.remove('show');
+    }, 5000);
+});
+
+// Exit presentation mode
+exitPresentation.addEventListener('click', () => {
+    document.body.classList.remove('presentation-mode');
+    clearInterval(slideInterval);
+    resetProgress();
+});
+
+// Project card click handlers
+projectCards.forEach(card => {
+    card.addEventListener('click', (e) => {
+        if (e.target.classList.contains('view-details-btn') || e.target.closest('.view-details-btn')) {
+            const projectId = card.getAttribute('data-project');
+            document.body.classList.add('presentation-mode');
+            goToSlide(parseInt(projectId) - 1);
+            startSlideshow();
+        }
+    });
+});
+
+function startSlideshow() {
+    clearInterval(slideInterval);
+    slideInterval = setInterval(() => {
+        if (!isPaused) {
+            nextSlide();
+        }
+    }, slideDuration);
+}
+
+function resetProgress() {
+    progressBars.forEach(bar => {
+        bar.style.width = '0%';
+    });
+}
+
+function updateProgress() {
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        if (isPaused) return;
+        progress += 0.1;
+        progressBars[currentSlide].style.width = `${progress}%`;
+        if (progress >= 100) {
+            clearInterval(progressInterval);
+        }
+    }, slideDuration / 1000);
+}
+
+function showSlide(index) {
+    if (document.body.classList.contains('presentation-mode')) {
+        slides.forEach(slide => {
+            slide.classList.remove('active');
+        });
+        
+        document.querySelectorAll('.indicator').forEach((ind, i) => {
+            ind.classList.toggle('active', i === index);
+        });
+        
+        slides[index].classList.add('active');
+        resetProgress();
+        updateProgress();
+    }
+}
+
+function nextSlide() {
+    currentSlide = (currentSlide + 1) % slides.length;
+    showSlide(currentSlide);
+}
+
+function prevSlide() {
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    showSlide(currentSlide);
+}
+
+function goToSlide(index) {
+    currentSlide = index;
+    showSlide(currentSlide);
+    clearInterval(slideInterval);
+    startSlideshow();
+}
+
+// Event listeners
+pauseBtn.addEventListener('click', () => {
+    isPaused = !isPaused;
+    pauseBtn.innerHTML = isPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+});
+
+prevBtn.addEventListener('click', () => {
+    prevSlide();
+    clearInterval(slideInterval);
+    startSlideshow();
+});
+
+nextBtn.addEventListener('click', () => {
+    nextSlide();
+    clearInterval(slideInterval);
+    startSlideshow();
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (!document.body.classList.contains('presentation-mode')) return;
+    
+    if (e.key === 'ArrowRight') {
+        nextSlide();
+        clearInterval(slideInterval);
+        startSlideshow();
+    } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+        clearInterval(slideInterval);
+        startSlideshow();
+    } else if (e.key === ' ') {
+        isPaused = !isPaused;
+        pauseBtn.innerHTML = isPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+        e.preventDefault(); // Prevent page scrolling on spacebar
+    } else if (e.key === 'Escape') {
+        document.body.classList.remove('presentation-mode');
+        clearInterval(slideInterval);
+        resetProgress();
+    }
+});
+
+// Charts
+document.addEventListener('DOMContentLoaded', function() {
+    // Overview Chart
+    const overallCtx = document.getElementById('overallProgressChart').getContext('2d');
+    const overallChart = new Chart(overallCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Road Expansion', 'Bridge Construction', 'Drainage System'],
+            datasets: [
+                {
+                    label: 'Current Completion (%)',
+                    data: [42, 35, 28],
+                    backgroundColor: ['rgba(74, 222, 128, 0.7)', 'rgba(250, 204, 21, 0.7)', 'rgba(248, 113, 113, 0.7)'],
+                    borderColor: ['rgba(74, 222, 128, 1)', 'rgba(250, 204, 21, 1)', 'rgba(248, 113, 113, 1)'],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Target Completion (%)',
+                    data: [60, 45, 50],
+                    backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Project 1 Charts
+    const completionCtx1 = document.getElementById('completionChart1').getContext('2d');
+    const completionChart1 = new Chart(completionCtx1, {
+        type: 'bar',
+        data: {
+            labels: ['Embarkment', 'Subbase', 'PCCP', 'Steel', 'SC (14)', 'SC (28)', 'Riprap', 'Curb'],
+            datasets: [
+                {
+                    label: 'Completed (%)',
+                    data: [70, 75, 75, 15, 0, 10, 100, 8],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Target (%)',
+                    data: [60, 60, 60, 60, 60, 60, 60, 60],
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+    
+    const progressCtx1 = document.getElementById('progressChart1').getContext('2d');
+    const progressChart1 = new Chart(progressCtx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'In Progress', 'Not Started'],
+            datasets: [{
+                data: [12.5, 75, 12.5],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Project 2 Charts
+    const completionCtx2 = document.getElementById('completionChart2').getContext('2d');
+    const completionChart2 = new Chart(completionCtx2, {
+        type: 'bar',
+        data: {
+            labels: ['Foundation', 'Pier', 'Deck', 'Steel', 'Concrete', 'Guardrail', 'Asphalt', 'Lighting'],
+            datasets: [
+                {
+                    label: 'Completed (%)',
+                    data: [70, 50, 25, 50, 40, 0, 0, 0],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Target (%)',
+                    data: [80, 65, 40, 60, 50, 20, 10, 5],
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+    
+    const progressCtx2 = document.getElementById('progressChart2').getContext('2d');
+    const progressChart2 = new Chart(progressCtx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'In Progress', 'Not Started'],
+            datasets: [{
+                data: [0, 62.5, 37.5],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Project 3 Charts
+    const completionCtx3 = document.getElementById('completionChart3').getContext('2d');
+    const completionChart3 = new Chart(completionCtx3, {
+        type: 'bar',
+        data: {
+            labels: ['Excavation', 'Pipe', 'Manhole', 'Catch Basin', 'Backfill', 'Surface', 'Testing'],
+            datasets: [
+                {
+                    label: 'Completed (%)',
+                    data: [40, 30, 30, 25, 30, 20, 0],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Target (%)',
+                    data: [70, 60, 55, 50, 45, 40, 30],
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+    
+    const progressCtx3 = document.getElementById('progressChart3').getContext('2d');
+    const progressChart3 = new Chart(progressCtx3, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'In Progress', 'Not Started'],
+            datasets: [{
+                data: [0, 85.7, 14.3],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>

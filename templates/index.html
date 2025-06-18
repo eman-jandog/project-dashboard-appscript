@@ -1,17 +1,785 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <base target="_top">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <?!= include("static/css/styles") ?>
   </head>
   <body>
-    <div id="app" class="container-fluid">
+<body class="bg-gradient-to-br from-blue-900 to-indigo-900 text-white">
+    <div id="fullscreenMessage" class="fullscreen-message">
+        Press F11 for best fullscreen experience
     </div>
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <!-- Chart JS Bundle -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <div class="presentation-toggle" id="presentationToggle">
+        <i class="fas fa-play"></i> Start Presentation
+    </div>
+
+    <div class="exit-presentation" id="exitPresentation">
+        <i class="fas fa-times"></i> Exit Presentation
+    </div>
+
+    <!-- Overview Dashboard -->
+    <div class="overview-container p-6">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">PROJECT DASHBOARD</h1>
+                <p class="text-lg opacity-80">Summary Overview</p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm opacity-70">Last Updated: Feb 7, 2024</p>
+                <p class="text-sm opacity-70">3 Active Projects</p>
+            </div>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+            <div class="stats-card bg-gradient-to-br from-blue-600 to-blue-800 p-4 rounded-xl">
+                <h3 class="text-sm font-medium opacity-80">Average Completion</h3>
+                <div class="flex items-end justify-between mt-2">
+                    <p class="text-3xl font-bold">35%</p>
+                    <div class="text-right">
+                        <p class="text-xs opacity-70">Target: 52%</p>
+                        <p class="text-xs text-yellow-300">-17%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-card bg-gradient-to-br from-indigo-600 to-indigo-800 p-4 rounded-xl">
+                <h3 class="text-sm font-medium opacity-80">Activities Completed</h3>
+                <div class="flex items-end justify-between mt-2">
+                    <p class="text-3xl font-bold">1/23</p>
+                    <div class="text-right">
+                        <p class="text-xs opacity-70">Remaining: 22</p>
+                        <p class="text-xs text-yellow-300">4.3% Complete</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-card bg-gradient-to-br from-purple-600 to-purple-800 p-4 rounded-xl">
+                <h3 class="text-sm font-medium opacity-80">Projects On Track</h3>
+                <div class="flex items-end justify-between mt-2">
+                    <p class="text-3xl font-bold">1/3</p>
+                    <div class="text-right">
+                        <p class="text-xs opacity-70">At Risk: 2</p>
+                        <p class="text-xs text-yellow-300">33% On Schedule</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-card bg-gradient-to-br from-pink-600 to-pink-800 p-4 rounded-xl">
+                <h3 class="text-sm font-medium opacity-80">3-Day Progress</h3>
+                <div class="flex items-end justify-between mt-2">
+                    <p class="text-3xl font-bold">6,653</p>
+                    <div class="text-right">
+                        <p class="text-xs opacity-70">Units completed</p>
+                        <p class="text-xs text-green-300">+2.4%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Overall Progress Chart -->
+        <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Overall Project Progress</h2>
+            <div class="chart-container">
+                <canvas id="overallProgressChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Project Cards -->
+        <h2 class="text-xl font-semibold mb-4">Project Summary</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Project 1 Card -->
+            <div class="project-card card bg-white bg-opacity-10 backdrop-blur-lg p-5" data-project="1">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold">ROAD EXPANSION</h3>
+                        <p class="text-sm opacity-70">ID: 24HE0031</p>
+                    </div>
+                    <div class="status-badge bg-green-500 bg-opacity-20 text-green-300 border border-green-500">
+                        On Track
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm opacity-70">Location: Sangat</p>
+                        <p class="text-sm opacity-70">Deadline: Dec 15, 2025</p>
+                        <p class="text-sm opacity-70">Days Left: 677</p>
+                    </div>
+                    <div class="progress-ring-container">
+                        <svg class="progress-ring" width="80" height="80">
+                            <circle class="progress-ring-circle" id="progress-ring-1"
+                                stroke="#4ade80"
+                                stroke-width="8"
+                                fill="transparent"
+                                r="32"
+                                cx="40"
+                                cy="40"/>
+                        </svg>
+                        <div class="progress-ring-text text-green-300">42%</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Activities Completed:</span>
+                        <span>1/8</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: 12.5%"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs opacity-70">Last Activity: Grounded Riprap</p>
+                        <p class="text-xs opacity-70">Next: Subbase Course</p>
+                    </div>
+                    <button class="view-details-btn bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-1 px-3 rounded-lg transition-all">
+                        View Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Project 2 Card -->
+            <div class="project-card card bg-white bg-opacity-10 backdrop-blur-lg p-5" data-project="2">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold">BRIDGE CONSTRUCTION</h3>
+                        <p class="text-sm opacity-70">ID: 24HE0032</p>
+                    </div>
+                    <div class="status-badge bg-yellow-500 bg-opacity-20 text-yellow-300 border border-yellow-500">
+                        Needs Attention
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm opacity-70">Location: Riverside</p>
+                        <p class="text-sm opacity-70">Deadline: Aug 30, 2025</p>
+                        <p class="text-sm opacity-70">Days Left: 570</p>
+                    </div>
+                    <div class="progress-ring-container">
+                        <svg class="progress-ring" width="80" height="80">
+                            <circle class="progress-ring-circle" id="progress-ring-2"
+                                stroke="#facc15"
+                                stroke-width="8"
+                                fill="transparent"
+                                r="32"
+                                cx="40"
+                                cy="40"/>
+                        </svg>
+                        <div class="progress-ring-text text-yellow-300">35%</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Activities Completed:</span>
+                        <span>0/8</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs opacity-70">Last Activity: Reinforcing Steel</p>
+                        <p class="text-xs opacity-70">Next: Pier Construction</p>
+                    </div>
+                    <button class="view-details-btn bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-1 px-3 rounded-lg transition-all">
+                        View Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Project 3 Card -->
+            <div class="project-card card bg-white bg-opacity-10 backdrop-blur-lg p-5" data-project="3">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold">DRAINAGE SYSTEM</h3>
+                        <p class="text-sm opacity-70">ID: 24HE0033</p>
+                    </div>
+                    <div class="status-badge bg-red-500 bg-opacity-20 text-red-300 border border-red-500">
+                        Behind Schedule
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm opacity-70">Location: Downtown</p>
+                        <p class="text-sm opacity-70">Deadline: Mar 15, 2025</p>
+                        <p class="text-sm opacity-70">Days Left: 402</p>
+                    </div>
+                    <div class="progress-ring-container">
+                        <svg class="progress-ring" width="80" height="80">
+                            <circle class="progress-ring-circle" id="progress-ring-3"
+                                stroke="#f87171"
+                                stroke-width="8"
+                                fill="transparent"
+                                r="32"
+                                cx="40"
+                                cy="40"/>
+                        </svg>
+                        <div class="progress-ring-text text-red-300">28%</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Activities Completed:</span>
+                        <span>0/7</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-red-500 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs opacity-70">Last Activity: Backfilling</p>
+                        <p class="text-xs opacity-70">Next: Surface Restoration</p>
+                    </div>
+                    <button class="view-details-btn bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-1 px-3 rounded-lg transition-all">
+                        View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project 1 Slide -->
+    <div class="slide" data-project="1">
+        <div class="min-h-screen p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold">ROAD EXPANSION</h1>
+                    <p class="text-lg opacity-80">Project ID: 24HE0031</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="text-sm opacity-70">Location: Sangat</p>
+                        <p class="text-sm opacity-70">Deadline: Dec 15, 2025</p>
+                    </div>
+                    <div class="status-badge bg-green-500 bg-opacity-20 text-green-300 border border-green-500">
+                        On Track
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+                <div class="stats-card bg-gradient-to-br from-blue-600 to-blue-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">Overall Completion</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">42%</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Target: 60%</p>
+                            <p class="text-xs text-yellow-300">-18%</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card bg-gradient-to-br from-indigo-600 to-indigo-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">Activities Completed</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">1/8</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Remaining: 7</p>
+                            <p class="text-xs text-green-300">Grounded Riprap</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card bg-gradient-to-br from-purple-600 to-purple-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">Days Remaining</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">677</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Total: 730 days</p>
+                            <p class="text-xs text-green-300">On Schedule</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card bg-gradient-to-br from-pink-600 to-pink-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">3-Day Progress</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">864</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Units completed</p>
+                            <p class="text-xs text-green-300">+2.3%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4 col-span-2">
+                    <h2 class="text-lg font-semibold mb-2">Completion vs Target (%)</h2>
+                    <div class="mini-chart">
+                        <canvas id="completionChart1"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4">
+                    <h2 class="text-lg font-semibold mb-2">Work Progress</h2>
+                    <div class="mini-chart">
+                        <canvas id="progressChart1"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Project Activities</h2>
+                    <p class="text-sm opacity-70">Road expansion for better spaces and area of roadway</p>
+                </div>
+                <div class="table-container">
+                    <table class="w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Activities</th>
+                                <th class="text-right">Total Quantities<br>(As per V.O)</th>
+                                <th class="text-right">Current Site Accomplishment<br>(As of Feb 7, 2024)</th>
+                                <th class="text-right">Previous Site Accomplishment<br>(As of Feb 2, 2024)</th>
+                                <th class="text-right">Work Accomplished<br>In 3 Days</th>
+                                <th class="text-right">Balance Qty<br>(As of Feb 7, 2024)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Embarkment</td>
+                                <td class="text-right">1,458.00</td>
+                                <td class="text-right">1,020.60</td>
+                                <td class="text-right">-</td>
+                                <td class="text-right">-</td>
+                                <td class="text-right">437.40</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Subbase Course</td>
+                                <td class="text-right">2,631.00</td>
+                                <td class="text-right">1,970.00</td>
+                                <td class="text-right">1,719.25</td>
+                                <td class="text-right">250.75</td>
+                                <td class="text-right">661.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>PCCP (Unreinforced)</td>
+                                <td class="text-right">9,677.00</td>
+                                <td class="text-right">7,249.00</td>
+                                <td class="text-right">6,656.00</td>
+                                <td class="text-right">593.00</td>
+                                <td class="text-right">2,428.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Reinforcing Steel</td>
+                                <td class="text-right">77,714.66</td>
+                                <td class="text-right">11,764.02</td>
+                                <td class="text-right">11,764.02</td>
+                                <td class="text-right">-</td>
+                                <td class="text-right">65,950.64</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Structural Concrete (14 Days)</td>
+                                <td class="text-right">151.00</td>
+                                <td class="text-right">-</td>
+                                <td class="text-right">-</td>
+                                <td class="text-right">-</td>
+                                <td class="text-right">151.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Structural Concrete (28 Days)</td>
+                                <td class="text-right">1,016.00</td>
+                                <td class="text-right">96.86</td>
+                                <td class="text-right">86.47</td>
+                                <td class="text-right">10.39</td>
+                                <td class="text-right">919.14</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Grounded Riprap</td>
+                                <td class="text-right">2,326.00</td>
+                                <td class="text-right">2,326.00</td>
+                                <td class="text-right">2,326.00</td>
+                                <td class="text-right">-</td>
+                                <td class="text-right">0.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Curb & Gutter</td>
+                                <td class="text-right">2,150.00</td>
+                                <td class="text-right">173.00</td>
+                                <td class="text-right">163.00</td>
+                                <td class="text-right">10.00</td>
+                                <td class="text-right">1,977.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+    </div>
+
+    <!-- Project 2 Slide -->
+    <div class="slide" data-project="2">
+        <div class="min-h-screen p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold">BRIDGE CONSTRUCTION</h1>
+                    <p class="text-lg opacity-80">Project ID: 24HE0032</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="text-sm opacity-70">Location: Riverside</p>
+                        <p class="text-sm opacity-70">Deadline: Aug 30, 2025</p>
+                    </div>
+                    <div class="status-badge bg-yellow-500 bg-opacity-20 text-yellow-300 border border-yellow-500">
+                        Needs Attention
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+                <div class="stats-card bg-gradient-to-br from-blue-600 to-blue-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">Overall Completion</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">35%</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Target: 45%</p>
+                            <p class="text-xs text-yellow-300">-10%</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card bg-gradient-to-br from-indigo-600 to-indigo-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">Activities Completed</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">0/8</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Remaining: 8</p>
+                            <p class="text-xs text-yellow-300">In Progress</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card bg-gradient-to-br from-purple-600 to-purple-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">Days Remaining</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">570</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Total: 650 days</p>
+                            <p class="text-xs text-yellow-300">Caution</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card bg-gradient-to-br from-pink-600 to-pink-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">3-Day Progress</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">4,890</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Units completed</p>
+                            <p class="text-xs text-green-300">+3.1%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4 col-span-2">
+                    <h2 class="text-lg font-semibold mb-2">Completion vs Target (%)</h2>
+                    <div class="mini-chart">
+                        <canvas id="completionChart2"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4">
+                    <h2 class="text-lg font-semibold mb-2">Work Progress</h2>
+                    <div class="mini-chart">
+                        <canvas id="progressChart2"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Project Activities</h2>
+                    <p class="text-sm opacity-70">Construction of a new bridge connecting the east and west sides of the river</p>
+                </div>
+                <div class="table-container">
+                    <table class="w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Activities</th>
+                                <th class="text-right">Total Quantities<br>(As per V.O)</th>
+                                <th class="text-right">Current Site Accomplishment<br>(As of Feb 7, 2024)</th>
+                                <th class="text-right">Previous Site Accomplishment<br>(As of Feb 2, 2024)</th>
+                                <th class="text-right">Work Accomplished<br>In 3 Days</th>
+                                <th class="text-right">Balance Qty<br>(As of Feb 7, 2024)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Foundation Work</td>
+                                <td class="text-right">2,500.00</td>
+                                <td class="text-right">1,750.00</td>
+                                <td class="text-right">1,500.00</td>
+                                <td class="text-right">250.00</td>
+                                <td class="text-right">750.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Pier Construction</td>
+                                <td class="text-right">1,200.00</td>
+                                <td class="text-right">600.00</td>
+                                <td class="text-right">500.00</td>
+                                <td class="text-right">100.00</td>
+                                <td class="text-right">600.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Deck Installation</td>
+                                <td class="text-right">3,800.00</td>
+                                <td class="text-right">950.00</td>
+                                <td class="text-right">800.00</td>
+                                <td class="text-right">150.00</td>
+                                <td class="text-right">2,850.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Reinforcing Steel</td>
+                                <td class="text-right">85,000.00</td>
+                                <td class="text-right">42,500.00</td>
+                                <td class="text-right">38,250.00</td>
+                                <td class="text-right">4,250.00</td>
+                                <td class="text-right">42,500.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Structural Concrete</td>
+                                <td class="text-right">2,800.00</td>
+                                <td class="text-right">1,120.00</td>
+                                <td class="text-right">980.00</td>
+                                <td class="text-right">140.00</td>
+                                <td class="text-right">1,680.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Guardrail Installation</td>
+                                <td class="text-right">1,500.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">1,500.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Asphalt Paving</td>
+                                <td class="text-right">4,200.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">4,200.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Lighting Installation</td>
+                                <td class="text-right">850.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">850.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+    </div>
+
+    <!-- Project 3 Slide -->
+    <div class="slide" data-project="3">
+        <div class="min-h-screen p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold">DRAINAGE SYSTEM UPGRADE</h1>
+                    <p class="text-lg opacity-80">Project ID: 24HE0033</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="text-sm opacity-70">Location: Downtown</p>
+                        <p class="text-sm opacity-70">Deadline: Mar 15, 2025</p>
+                    </div>
+                    <div class="status-badge bg-red-500 bg-opacity-20 text-red-300 border border-red-500">
+                        Behind Schedule
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+                <div class="stats-card bg-gradient-to-br from-blue-600 to-blue-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">Overall Completion</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">28%</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Target: 50%</p>
+                            <p class="text-xs text-red-300">-22%</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card bg-gradient-to-br from-indigo-600 to-indigo-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">Activities Completed</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">0/7</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Remaining: 7</p>
+                            <p class="text-xs text-red-300">Delayed</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card bg-gradient-to-br from-purple-600 to-purple-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">Days Remaining</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">402</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Total: 500 days</p>
+                            <p class="text-xs text-red-300">Critical</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card bg-gradient-to-br from-pink-600 to-pink-800 p-4 rounded-xl">
+                    <h3 class="text-sm font-medium opacity-80">3-Day Progress</h3>
+                    <div class="flex items-end justify-between mt-2">
+                        <p class="text-3xl font-bold">899</p>
+                        <div class="text-right">
+                            <p class="text-xs opacity-70">Units completed</p>
+                            <p class="text-xs text-yellow-300">+1.8%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4 col-span-2">
+                    <h2 class="text-lg font-semibold mb-2">Completion vs Target (%)</h2>
+                    <div class="mini-chart">
+                        <canvas id="completionChart3"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4">
+                    <h2 class="text-lg font-semibold mb-2">Work Progress</h2>
+                    <div class="mini-chart">
+                        <canvas id="progressChart3"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-white bg-opacity-10 backdrop-blur-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Project Activities</h2>
+                    <p class="text-sm opacity-70">Upgrading the city's drainage system to prevent flooding during heavy rainfall</p>
+                </div>
+                <div class="table-container">
+                    <table class="w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Activities</th>
+                                <th class="text-right">Total Quantities<br>(As per V.O)</th>
+                                <th class="text-right">Current Site Accomplishment<br>(As of Feb 7, 2024)</th>
+                                <th class="text-right">Previous Site Accomplishment<br>(As of Feb 2, 2024)</th>
+                                <th class="text-right">Work Accomplished<br>In 3 Days</th>
+                                <th class="text-right">Balance Qty<br>(As of Feb 7, 2024)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Excavation</td>
+                                <td class="text-right">5,800.00</td>
+                                <td class="text-right">2,320.00</td>
+                                <td class="text-right">2,030.00</td>
+                                <td class="text-right">290.00</td>
+                                <td class="text-right">3,480.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Pipe Installation</td>
+                                <td class="text-right">3,200.00</td>
+                                <td class="text-right">960.00</td>
+                                <td class="text-right">800.00</td>
+                                <td class="text-right">160.00</td>
+                                <td class="text-right">2,240.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Manhole Construction</td>
+                                <td class="text-right">450.00</td>
+                                <td class="text-right">135.00</td>
+                                <td class="text-right">90.00</td>
+                                <td class="text-right">45.00</td>
+                                <td class="text-right">315.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Catch Basin Installation</td>
+                                <td class="text-right">780.00</td>
+                                <td class="text-right">195.00</td>
+                                <td class="text-right">156.00</td>
+                                <td class="text-right">39.00</td>
+                                <td class="text-right">585.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Backfilling</td>
+                                <td class="text-right">4,500.00</td>
+                                <td class="text-right">1,350.00</td>
+                                <td class="text-right">1,125.00</td>
+                                <td class="text-right">225.00</td>
+                                <td class="text-right">3,150.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Surface Restoration</td>
+                                <td class="text-right">2,800.00</td>
+                                <td class="text-right">560.00</td>
+                                <td class="text-right">420.00</td>
+                                <td class="text-right">140.00</td>
+                                <td class="text-right">2,240.00</td>
+                            </tr>
+                            <tr class="hover:bg-white hover:bg-opacity-10">
+                                <td>Testing & Commissioning</td>
+                                <td class="text-right">320.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">0.00</td>
+                                <td class="text-right">320.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="control-btn" id="prevBtn">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="control-btn" id="pauseBtn">
+            <i class="fas fa-pause"></i>
+        </div>
+        <div class="control-btn" id="nextBtn">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="slide-indicator" id="slideIndicator"></div>
     <?!= include("static/js/script") ?>
   </body>
 </html>

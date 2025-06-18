@@ -1,138 +1,284 @@
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f0f4f8;
 }
 
-.container-fluid {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
-  
+.slide {
+    opacity: 1;
+    transition: opacity 0.8s ease-in-out;
+    display: none;
+}
+
+body.presentation-mode {
+    overflow: hidden;
+}
+
+body.presentation-mode .slide {
+    display: block;
+}
+
+body.presentation-mode .slide:not(.active) {
+    display: none;
+    opacity: 0;
+}
+
+body.presentation-mode .overview-container {
+    display: none;
+}
+
+.progress-bar {
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.3);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: none;
+}
+
+body.presentation-mode .progress-bar {
+    display: block;
+}
+
+.progress {
+    height: 100%;
+    background-color: #ffffff;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th, td {
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+}
+
+/* Sticky header styles */
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+th {
+    background-color: rgba(49, 46, 129, 0.9); /* Indigo-900 with opacity */
+    backdrop-filter: blur(4px);
 }
 
 .table-container {
-  position: absolute;
-  top: 140px;
-  left: 0;
-  display: flex;
-  gap: 10px;
-  height: 100vh;
-  width: max-content;
-  justify-content: center;
-  transition: 1s;
-}
-
-.slider {
-  width: 100vw;
-}
-
-.ctn-chart {
-  max-width: 100%;
-  width: 1400px;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; 
-  align-items: center;
-  z-index: 0;
-  opacity: 1;
-  margin: 0 auto;
-}
-
-
-/* Panel element styles (for spacing) */
-.panels {
-  width: 100%; 
-  display: flex;
-  flex-direction: row;
-  justify-content: center; 
-  align-items: center;
-  gap: 20px;
-  padding: 20px 10px 10px 10px;
-}
-
-/* Panel element styles */
-.panel {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; 
-  align-items: center; 
-  text-align: center; 
-  border-radius: 8px; 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-  width: 350px;
-  height: 120px;
-  padding: 10px;
-  gap: 5px;
-  
-}
-
-/* Optional: Style the text inside each panel */
-.panel h1 {
-  font-size: 2rem;
-}
-
-.panel p {
-  font-size: 0.8rem;
-}
-
-
-.dots {
-  position: absolute;
-  top: 100px;
-  color: #c5c5c5;
-  left: 0;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-}
-
-.dots li{
-  list-style: none;
-  width: 10px;
-  height: 10px;
-  background-color: #c5c5c5;
-  margin: 10px;
-  border-radius: 20px;
-  transition: 1s;
-  cursor: pointer;
-}
-
-.dots li.active {
-  width: 30px;
-}
-
-@media (max-width: 1400px) {
-
-  .ctn-chart {
-    width: 900px;
-  }
-
-}
-
-@media (max-width: 1024px) {
-
-  body {
+    overflow-x: auto;
+    max-height: 400px;
     overflow-y: auto;
-  }
-
-  .panels {
-    flex-wrap: wrap;
-  }
 }
 
-
-@media (max-width: 768px) {
-
-  .panel {
-    height: auto;
-    width: 230px;
-  }
-
+.controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+    display: none;
 }
-</style>
+
+body.presentation-mode .controls {
+    display: flex;
+}
+
+.control-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+}
+
+.slide-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+    display: none;
+}
+
+body.presentation-mode .slide-indicator {
+    display: flex;
+}
+
+.indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    background-color: white;
+    transform: scale(1.2);
+}
+
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.fullscreen-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.fullscreen-message.show {
+    opacity: 1;
+}
+
+.mini-chart {
+    height: 200px;
+}
+
+.stats-card {
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.presentation-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 10px 20px;
+    background-color: #4f46e5;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.presentation-toggle:hover {
+    background-color: #4338ca;
+    transform: translateY(-2px);
+}
+
+.exit-presentation {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 10px 20px;
+    background-color: #ef4444;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: none;
+    align-items: center;
+    gap: 8px;
+}
+
+body.presentation-mode .exit-presentation {
+    display: flex;
+}
+
+body.presentation-mode .presentation-toggle {
+    display: none;
+}
+
+.exit-presentation:hover {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+}
+
+.project-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+.progress-ring-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+    stroke-dasharray: 251.2;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.progress-ring-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+    </style>
