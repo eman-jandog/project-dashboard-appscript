@@ -174,7 +174,72 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+ function createSlide(project, cardsData) {
+    // Format data
 
+
+    // Create Slides
+    const slide = document.createElement('div')
+    slide.classList.add("slide")
+    slide.setAttribute('data-project', id)
+
+
+    const outerDiv = document.createElement('div')
+    outerDiv.classList.add('min-h-screen p-6')
+
+
+    const firstDiv = document.createElement('div');
+    firstDiv.classList.add("flex justify-between items-center mb-6");
+
+    const innerDiv1 = document.createElement('div');
+    const title = document.createElement('h1');
+    projectTitle.classList.add("text-3xl font-bold");
+    projectTitle.innerHTML = project.name;
+
+    const id = document.createElement('p');
+    id.classList.add("text-lg opacity-80");
+    id.innerHTML = project.id;
+
+    innerDiv1.appendChild(title);
+    innerDiv1.appendChild(id);
+
+    const innerDiv2 = document.createElement('div');
+    innerDiv2.classList.add("flex items-center gap-4");
+    
+    const statusPanel = document.createElement('div');
+    statusPanel.classList.add('text-right');
+    
+    const location = document.createElement('p');
+    location.classList.add("text-sm opacity-70");
+    location.innerHTML = project.location;
+
+    const deadline = document.createElement('p');
+    deadline.classList.add("text-sm opacity-70");
+    deadline.innerHTML = project.deadline;
+
+    statusPanel.appendChild(location);
+    statusPanel.appendChild(deadline);
+
+    const status = document.createElement('div');
+    status.classList.add("status-badge bg-green-500 bg-opacity-20 text-green-300 border border-green-500");
+    status.innerHTML = project.status;
+
+    innerDiv2.appendChild(statusPanel);
+    innerDiv2.appendChild(status);
+
+
+    const secondDiv = document.createElement('div');
+    secondDiv.classList.add("grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6");
+
+    for (let i=0; i<=4; i++) {
+        const card = document.createElement('div');
+        card.classList.add("stats-card bg-gradient-to-br from-blue-600 to-blue-800 p-4 rounded-xl");
+
+        const h3 = document.createElement('h3');
+        h3.classList.add("text-sm font-medium opacity-80");
+        h3.innerHTML = cardsData.card;
+    }
+}
 
 // Charts
 document.addEventListener('DOMContentLoaded', function() {
@@ -189,6 +254,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .getDashboardData()
 
+
+    
+
     // Overview Chart
     function setProjectData(projects) {
 
@@ -201,19 +269,61 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       for (const project of projects) {
+
+        const cardsData = new Array(4);
         
         overallChartData.label.push(project.name);
 
+        const msDiff = new Date(project.deadline) - new Date();
+        const daysCount = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
+
+        cardsData[2] = {
+            card: 'Days Remaining',
+            main: daysCount,
+            subtitle: 'On Schedule'
+        }
+        
         project.projectData.headers.forEach((item, index) => {
           if (item == 'Completed') {
             const filterRow = project.projectData.values.filter(row => row[0] == 'Total');
             const [completed, target] = filterRow[0].filter((val,i) => i == index || i == index+1);
             overallChartData.completed.push(completed);
             overallChartData.target.push(target)
+            cardsData[0] = {
+                card: 'Overall Completion',
+                main: `${completed}%`,
+                subtitle: `Target: ${target}`
+            }
+          }
+
+          if (/Balance.*/.text(item)) {
+            const doneActivites = 0;
+            project.projectData.values.forEach((val, i) => {
+                if (!val[index]) {
+                    doneActivites++;
+                }
+            })
+            
+            cardsData[1] = {
+                card: 'Activities Completed',
+                main: `${doneActivites}/${project.projectData.values[0].length - 1}`,
+                subtitle: `Remaining: ${project.projectData.values[0].length - 1 - doneActivites}`
+            }
+          }
+
+          if (/Work.*/.text(item)) {
+            const filterRow = project.projectData.values.filter(row => row[0] == 'Total');
+            const [accomplished] = filterRow[0].filter((val,i) => i == index);
+            cardsData[3] = {
+                card: '3-Day Progress',
+                main: accomplished,
+                subtitle: 'Units completed'
+            }
           }
         })
-
       }
+
+      const targetMax = Math.max(overallChartData.target)
 
       const overallCtx = document.getElementById('overallProgressChart').getContext('2d');
       const overallChart = new Chart(overallCtx, {
@@ -223,14 +333,14 @@ document.addEventListener('DOMContentLoaded', function() {
               datasets: [
                   {
                       label: 'Current Completion (%)',
-                      data: [42, 35, 28],
+                      data: overallChartData.completed,
                       backgroundColor: ['rgba(74, 222, 128, 0.7)', 'rgba(250, 204, 21, 0.7)', 'rgba(248, 113, 113, 0.7)'],
                       borderColor: ['rgba(74, 222, 128, 1)', 'rgba(250, 204, 21, 1)', 'rgba(248, 113, 113, 1)'],
                       borderWidth: 1
                   },
                   {
                       label: 'Target Completion (%)',
-                      data: [60, 45, 50],
+                      data: overallChartData.target,
                       backgroundColor: 'rgba(99, 102, 241, 0.7)',
                       borderColor: 'rgba(99, 102, 241, 1)',
                       borderWidth: 1
@@ -243,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
               scales: {
                   y: {
                       beginAtZero: true,
-                      max: 100,
+                      max: targetMax,
                       grid: {
                           color: 'rgba(255, 255, 255, 0.1)'
                       },
@@ -270,6 +380,8 @@ document.addEventListener('DOMContentLoaded', function() {
           }
       });
       
+     
+
       // Project 1 Charts
       const completionCtx1 = document.getElementById('completionChart1').getContext('2d');
       const completionChart1 = new Chart(completionCtx1, {
