@@ -13,7 +13,7 @@ class App {
         const name = sheet.getRange('A1').getValue();
         const description = sheet.getRange('A2').getValue();
         const id = sheet.getRange('B4').getValue();
-        const deadline = sheet.getRange('B5').getValue().toLocaleString('en-PH',{year: 'numeric', month: 'numeric', day: 'numeric'});
+        const deadline = sheet.getRange('B5').getValue().toLocaleString('en-ph', { year: 'numeric', month: 'numeric', day: 'numeric'});
         const location = sheet.getRange('D4').getValue();
         const status = sheet.getRange('D5').getValue();
 
@@ -27,6 +27,7 @@ class App {
         const values = []
         for (let i=7; i<pt.length; i++) {
           const row = pt[i];
+          if (!row[0]) continue;
           values.push(row.filter((item,i) => i < headers.length))
         }
 
@@ -51,9 +52,11 @@ class App {
 }
 
 function getDashboardData() {
-    const app = new App()
-    const data = app.getProjectsData()
-    return {projects: data}
+    const app = new App();
+    const data = app.getProjectsData();
+
+    if (!data) throw new Error(`Resulting project data is empty.`);
+    return {projects: data};
 }
 
 
