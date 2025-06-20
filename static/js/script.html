@@ -32,15 +32,6 @@ setProgressRing('progress-ring-1', 42);
 setProgressRing('progress-ring-2', 35);
 setProgressRing('progress-ring-3', 28);
 
-// Create slide indicators
-slides.forEach((_, index) => {
-    const indicator = document.createElement('div');
-    indicator.classList.add('indicator');
-    if (index === 0) indicator.classList.add('active');
-    indicator.addEventListener('click', () => goToSlide(index));
-    slideIndicator.appendChild(indicator);
-});
-
 // Toggle presentation mode
 presentationToggle.addEventListener('click', () => {
     document.body.classList.add('presentation-mode');
@@ -226,10 +217,10 @@ function createSlide(project, cardsData) {
     // Create Cards
     const divCards = document.createElement('div');
     divCards.className = "grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6";
-
-    cardsData.forEach(c => {
+    const colorClass = ['from-blue-600 to-blue-800','from-indigo-600 to-indigo-800','from-purple-600 to-purple-800','from-pink-600 to-pink-800'];
+    cardsData.forEach((c,i) => {
         const card = document.createElement('div');
-        card.className = "stats-card bg-gradient-to-br from-blue-600 to-blue-800 p-4 rounded-xl";
+        card.className = `stats-card bg-gradient-to-br p-4 rounded-xl ${colorClass[i]}`;
 
         const h3 = document.createElement('h3');
         h3.className = "text-sm font-medium opacity-80";
@@ -262,18 +253,18 @@ function createSlide(project, cardsData) {
     const divCharts = document.createElement('div')
     divCharts.className = 'grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6';
 
-    let activities = new Array()
-    let targets = new Array()
-    let completed = new Array()
+    const activities = new Array()
+    const targets = new Array()
+    const completed = new Array()
     const activityStatus = new Array(3);
 
     project.projectData.values.forEach((row, i) => {
-        if (i == row.length-1) return;
-        activities.push(row[0]);
-        targets.push(row[-1]);
-        completed.push(row[-2]);
+        if (i < row.length-1) {
+            activities.push(row[0]);
+            targets.push(row[row.length-1]);
+            completed.push(row.length-2);
+        }        
     })
-
 
     for (let i=0; i<completed.length; i++) {
         if (completed[i] == targets[i]) {
@@ -290,6 +281,7 @@ function createSlide(project, cardsData) {
     for (let i=1; i<=2; i++) {
         const chartCard = document.createElement('div')
         chartCard.className = 'card bg-white bg-opacity-10 backdrop-blur-lg p-4';
+        if (i==1) chartCard.classList.add('col-span-2');
 
         const chartTitle = document.createElement('h2')
         chartTitle.className = 'text-lg font-semibold mb-2';
@@ -393,7 +385,11 @@ function createSlide(project, cardsData) {
         miniChart.append(chartCanva);
 
         chartCard.append(chartTitle, miniChart);
+
+        divCharts.append(chartCard);
     }
+
+    
 
     // Create Table
     const divTable = document.createElement('div');
@@ -598,5 +594,14 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .getDashboardData()
 
+});
+
+// Create slide indicators
+slides.forEach((_, index) => {
+    const indicator = document.createElement('div');
+    indicator.classList.add('indicator');
+    if (index === 0) indicator.classList.add('active');
+    indicator.addEventListener('click', () => goToSlide(index));
+    slideIndicator.appendChild(indicator);
 });
 </script>
