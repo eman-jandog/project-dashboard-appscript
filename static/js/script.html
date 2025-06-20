@@ -174,71 +174,414 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
- function createSlide(project, cardsData) {
-    // Format data
-
-
+// Create Slide
+function createSlide(project, cardsData) {
     // Create Slides
     const slide = document.createElement('div')
     slide.classList.add("slide")
-    slide.setAttribute('data-project', id)
-
 
     const outerDiv = document.createElement('div')
-    outerDiv.classList.add('min-h-screen p-6')
+    outerDiv.className = 'min-h-screen p-6';
 
+    // Create Header
+    const divHeader = document.createElement('div');
+    divHeader.className = "flex justify-between items-center mb-6";
 
-    const firstDiv = document.createElement('div');
-    firstDiv.classList.add("flex justify-between items-center mb-6");
-
-    const innerDiv1 = document.createElement('div');
-    const title = document.createElement('h1');
-    projectTitle.classList.add("text-3xl font-bold");
+    const headerDiv1 = document.createElement('div');
+    const projectTitle = document.createElement('h1');
+    projectTitle.className = "text-3xl font-bold";
     projectTitle.innerHTML = project.name;
 
-    const id = document.createElement('p');
-    id.classList.add("text-lg opacity-80");
-    id.innerHTML = project.id;
+    const projectId = document.createElement('p');
+    projectId.className = "text-lg opacity-80";
+    projectId.textContent = project.id;
 
-    innerDiv1.appendChild(title);
-    innerDiv1.appendChild(id);
+    headerDiv1.append(projectTitle, projectId);
 
-    const innerDiv2 = document.createElement('div');
-    innerDiv2.classList.add("flex items-center gap-4");
-    
+    const headerDiv2 = document.createElement('div');
+    headerDiv2.className = "flex items-center gap-4";
+
     const statusPanel = document.createElement('div');
     statusPanel.classList.add('text-right');
-    
+
     const location = document.createElement('p');
-    location.classList.add("text-sm opacity-70");
+    location.className = "text-sm opacity-70";
     location.innerHTML = project.location;
 
     const deadline = document.createElement('p');
-    deadline.classList.add("text-sm opacity-70");
+    deadline.className = "text-sm opacity-70";
     deadline.innerHTML = project.deadline;
 
-    statusPanel.appendChild(location);
-    statusPanel.appendChild(deadline);
+    statusPanel.append(location, deadline);
 
     const status = document.createElement('div');
-    status.classList.add("status-badge bg-green-500 bg-opacity-20 text-green-300 border border-green-500");
+    status.className = "status-badge bg-green-500 bg-opacity-20 text-green-300 border border-green-500";
     status.innerHTML = project.status;
 
-    innerDiv2.appendChild(statusPanel);
-    innerDiv2.appendChild(status);
+    headerDiv2.append(status, statusPanel);
+
+    divHeader.append(headerDiv1, headerDiv2);
 
 
-    const secondDiv = document.createElement('div');
-    secondDiv.classList.add("grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6");
+    // Create Cards
+    const divCards = document.createElement('div');
+    divCards.className = "grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6";
 
-    for (let i=0; i<=4; i++) {
+    cardsData.forEach(c => {
         const card = document.createElement('div');
-        card.classList.add("stats-card bg-gradient-to-br from-blue-600 to-blue-800 p-4 rounded-xl");
+        card.classList.add("stats-card", "bg-gradient-to-br", "from-blue-600", "to-blue-800", "p-4", "rounded-xl");
 
         const h3 = document.createElement('h3');
-        h3.classList.add("text-sm font-medium opacity-80");
-        h3.innerHTML = cardsData.card;
+        h3.classList.add("text-sm","font-medium", "opacity-80");
+        h3.textContent = c.card;
+
+        const stats = document.createElement('div');
+        stats.classList.add('flex', 'items-end','justify-between','mt-2');
+
+        const main = document.createElement('p')
+        main.classList.add('text-3xl','font-bold');
+        main.textContent = c.main;
+
+        const subStat = document.createElement('div');
+        subStat.classList.add('text-right');
+
+        const subTitle = document.createElement('p');
+        subTitle.classList.add('text-xs', 'opacity-70');
+        subTitle.textContent = c.subtitle;
+
+        subStat.append(subTitle)
+
+        stats.append(main, subStat);
+
+        card.append(h3, stats);
+
+        divCards.appendChild(card);
+    })
+
+    // Create charts
+    const divCharts = document.createElement('div')
+    divCharts.className = 'grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6';
+
+    let activities = new Array()
+    let targets = new Array()
+    let completed = new Array()
+    const activityStatus = new Array(3);
+
+    project.projectData.values.forEach((row, i) => {
+        if (i == row.length-1) return;
+        activities.push(row[0]);
+        targets.push(row[-1]);
+        completed.push(row[-2]);
+    })
+
+
+    for (let i=0; i<completed.length; i++) {
+        if (completed[i] == targets[i]) {
+            activityStatus[0] ? activityStatus[0]++ : activityStatus[0] = 1;
+        }
+        else if (!completed[i]) {
+            activityStatus[2] ? activityStatus[2]++ : activityStatus[2] = 1;
+        }
+        else {
+            activityStatus[1] ? activityStatus[1]++ : activityStatus[1] = 1;
+        }
     }
+
+    for (let i=1; i<=2; i++) {
+        const chartCard = document.createElement('div')
+        chartCard.className = 'card bg-white bg-opacity-10 backdrop-blur-lg p-4';
+
+        const chartTitle = document.createElement('h2')
+        chartTitle.className = 'text-lg font-semibold mb-2';
+        chartTitle.textContent = "Completion vs. Target (%)";
+
+        const miniChart = document.createElement('div')
+        miniChart.className = 'mini-chart';
+        const chartCanva = document.createElement('canvas');
+
+        const chartCtx = chartCanva.getContext('2d');
+        let completionChart;
+        if (i == 1) {
+            completionChart = new Chart(chartCtx, {
+                type: 'bar',
+                data: {
+                    labels: activities,
+                    datasets: [
+                        {
+                            label: 'Completed (%)',
+                            data: completed,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Target (%)',
+                            data: targets,
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(targets),
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            completionChart = new Chart(chartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Not Started'],
+                    datasets: [{
+                        data: activityStatus,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(255, 99, 132, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        miniChart.append(chartCanva);
+
+        chartCard.append(chartTitle, miniChart);
+    }
+
+    // Create Table
+    const divTable = document.createElement('div');
+    divTable.className = 'card bg-white bg-opacity-10 backdrop-blur-lg p-4';
+
+    const tableTitle = document.createElement('div');
+    tableTitle.className = 'flex justify-between items-center mb-4';
+    const h2Title = document.createElement('h2');
+    h2Title.className = 'text-lg font-semibold';
+    h2Title.textContent = "Project Activities";
+    const pDescription = document.createElement('p')
+    pDescription.className = 'text-sm opacity-70';
+    pDescription.textContent = 'Road expansion for better spaces and area of roadway';
+
+    tableTitle.append(h2Title, pDescription);
+
+    const tableDiv = document.createElement('div');
+    tableDiv.classList.add('table-container');
+    const table = document.createElement('table');
+    table.classList.add('w-full');
+    const thead = document.createElement('thead');
+    const rowHeaders = document.createElement('tr');
+    project.projectData.headers.forEach(header => {
+        let tableHeader = document.createElement('th');
+        tableHeader.classList.add('text-center');
+        tableHeader.textContent = header;
+        rowHeaders.appendChild(tableHeader);
+    })
+
+    thead.appendChild(rowHeaders);
+
+    const tbody = document.createElement('tbody');
+    project.projectData.values.forEach(row => {
+        const rowTable = document.createElement('tr');
+        rowTable.className = 'hover:bg-white hover:bg-opacity-10';
+        row.forEach((data, i) => {
+            const rowValue = document.createElement('td');
+            if (i!=0) rowValue.classList.add('text-right')
+            rowValue.textContent = data;
+            rowTable.appendChild(rowValue);
+        })
+        tbody.appendChild(rowTable);
+    })    
+
+    table.append(thead, tbody);
+    tableDiv.append(table);
+    divTable.append(tableTitle, tableDiv);
+    outerDiv.append(divHeader, divCards, divCharts, divTable)
+
+    //Progress Bar
+    const divProgress = document.createElement('div');
+    divProgress.classList.add('progress-bar');
+    divProgress.innerHTML = '<div class="progress"></div>';
+
+    slide.appendChild(outerDiv, divProgress);
+
+    document.body.append(slide);
+}
+
+function createDashboard(overallChartData) {
+    const targetMax = Math.max(overallChartData.target)
+    const overallCtx = document.getElementById('overallProgressChart').getContext('2d');
+    const overallChart = new Chart(overallCtx, {
+        type: 'bar',
+        data: {
+            labels: overallChartData.label,
+            datasets: [
+                {
+                    label: 'Current Completion (%)',
+                    data: overallChartData.completed,
+                    backgroundColor: ['rgba(74, 222, 128, 0.7)', 'rgba(250, 204, 21, 0.7)', 'rgba(248, 113, 113, 0.7)'],
+                    borderColor: ['rgba(74, 222, 128, 1)', 'rgba(250, 204, 21, 1)', 'rgba(248, 113, 113, 1)'],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Target Completion (%)',
+                    data: overallChartData.target,
+                    backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: targetMax,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+// Iniatiate Setting Data
+function setProjectData(projects) {
+    // Create Data for Overall chart
+    const overallChartData = {
+        label: [],
+        completed: [],
+        target: [],
+        backgroundColor: [],
+        borderColor: []
+    }
+
+    for (const project of projects) {
+        const totalRow = project.projectData.values.filter(row => row[0] == 'Total');
+        overallChartData.label.push(project.name);
+
+        // Create cards data
+        const cardsData = new Array(4);
+
+        // For deadline card
+        const msDiff = new Date(project.deadline) - new Date();
+        const daysCount = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
+        cardsData[2] = {
+            card: 'Days Remaining',
+            main: daysCount,
+            subtitle: 'On Schedule'
+        }
+        
+        project.projectData.headers.forEach((item, index) => {
+            if (item == 'Completed') {
+                const [completed, target] = totalRow[0].filter((val,i) => i == index || i == index+1);
+                
+                overallChartData.completed.push(completed);
+                overallChartData.target.push(target)
+
+                const percentage = Math.round((completed / target) * 100);
+                cardsData[0] = {
+                    card: 'Overall Completion',
+                    main: `${percentage}%`,
+                    subtitle: `Target: ${target}`
+                }
+            }
+
+            if (/Balance.*/.test(item)) {
+                let doneActivites = 0;
+                project.projectData.values.forEach((val, i) => {
+                    if (!val[index]) {
+                        doneActivites++;
+                    }
+                })
+                cardsData[1] = {
+                    card: 'Activities Completed',
+                    main: `${doneActivites}/${project.projectData.values[0].length - 1}`,
+                    subtitle: `Remaining: ${project.projectData.values[0].length - 1 - doneActivites}`
+                }
+            }
+
+            if (/Work.*/.test(item)) {
+                const [accomplished] = totalRow[0].filter((val,i) => i == index);
+                cardsData[3] = {
+                    card: '3-Day Progress',
+                    main: accomplished,
+                    subtitle: 'Units completed'
+                }
+            }
+        })
+
+        createSlide(project, cardsData);
+    }
+
+    createDashboard(overallChartData);
 }
 
 // Charts
@@ -247,6 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
     google.script.run
         .withSuccessHandler(({ projects }) => {
             setProjectData(projects);
+
         })
         .withFailureHandler(error => {
             console.error(error.message)
@@ -254,403 +598,5 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .getDashboardData()
 
-
-    
-
-    // Overview Chart
-    function setProjectData(projects) {
-
-      const overallChartData = {
-        label: [],
-        completed: [],
-        target: [],
-        backgroundColor: [],
-        borderColor: []
-      }
-
-      for (const project of projects) {
-
-        const cardsData = new Array(4);
-        
-        overallChartData.label.push(project.name);
-
-        const msDiff = new Date(project.deadline) - new Date();
-        const daysCount = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
-
-        cardsData[2] = {
-            card: 'Days Remaining',
-            main: daysCount,
-            subtitle: 'On Schedule'
-        }
-        
-        project.projectData.headers.forEach((item, index) => {
-          if (item == 'Completed') {
-            const filterRow = project.projectData.values.filter(row => row[0] == 'Total');
-            const [completed, target] = filterRow[0].filter((val,i) => i == index || i == index+1);
-            overallChartData.completed.push(completed);
-            overallChartData.target.push(target)
-            cardsData[0] = {
-                card: 'Overall Completion',
-                main: `${completed}%`,
-                subtitle: `Target: ${target}`
-            }
-          }
-
-          if (/Balance.*/.text(item)) {
-            const doneActivites = 0;
-            project.projectData.values.forEach((val, i) => {
-                if (!val[index]) {
-                    doneActivites++;
-                }
-            })
-            
-            cardsData[1] = {
-                card: 'Activities Completed',
-                main: `${doneActivites}/${project.projectData.values[0].length - 1}`,
-                subtitle: `Remaining: ${project.projectData.values[0].length - 1 - doneActivites}`
-            }
-          }
-
-          if (/Work.*/.text(item)) {
-            const filterRow = project.projectData.values.filter(row => row[0] == 'Total');
-            const [accomplished] = filterRow[0].filter((val,i) => i == index);
-            cardsData[3] = {
-                card: '3-Day Progress',
-                main: accomplished,
-                subtitle: 'Units completed'
-            }
-          }
-        })
-      }
-
-      const targetMax = Math.max(overallChartData.target)
-
-      const overallCtx = document.getElementById('overallProgressChart').getContext('2d');
-      const overallChart = new Chart(overallCtx, {
-          type: 'bar',
-          data: {
-              labels: overallChartData.label,
-              datasets: [
-                  {
-                      label: 'Current Completion (%)',
-                      data: overallChartData.completed,
-                      backgroundColor: ['rgba(74, 222, 128, 0.7)', 'rgba(250, 204, 21, 0.7)', 'rgba(248, 113, 113, 0.7)'],
-                      borderColor: ['rgba(74, 222, 128, 1)', 'rgba(250, 204, 21, 1)', 'rgba(248, 113, 113, 1)'],
-                      borderWidth: 1
-                  },
-                  {
-                      label: 'Target Completion (%)',
-                      data: overallChartData.target,
-                      backgroundColor: 'rgba(99, 102, 241, 0.7)',
-                      borderColor: 'rgba(99, 102, 241, 1)',
-                      borderWidth: 1
-                  }
-              ]
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                  y: {
-                      beginAtZero: true,
-                      max: targetMax,
-                      grid: {
-                          color: 'rgba(255, 255, 255, 0.1)'
-                      },
-                      ticks: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  },
-                  x: {
-                      grid: {
-                          color: 'rgba(255, 255, 255, 0.1)'
-                      },
-                      ticks: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              },
-              plugins: {
-                  legend: {
-                      labels: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              }
-          }
-      });
-      
-     
-
-      // Project 1 Charts
-      const completionCtx1 = document.getElementById('completionChart1').getContext('2d');
-      const completionChart1 = new Chart(completionCtx1, {
-          type: 'bar',
-          data: {
-              labels: ['Embarkment', 'Subbase', 'PCCP', 'Steel', 'SC (14)', 'SC (28)', 'Riprap', 'Curb'],
-              datasets: [
-                  {
-                      label: 'Completed (%)',
-                      data: [70, 75, 75, 15, 0, 10, 100, 8],
-                      backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                      borderColor: 'rgba(54, 162, 235, 1)',
-                      borderWidth: 1
-                  },
-                  {
-                      label: 'Target (%)',
-                      data: [60, 60, 60, 60, 60, 60, 60, 60],
-                      backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                      borderColor: 'rgba(255, 99, 132, 1)',
-                      borderWidth: 1
-                  }
-              ]
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                  y: {
-                      beginAtZero: true,
-                      max: 100,
-                      grid: {
-                          color: 'rgba(255, 255, 255, 0.1)'
-                      },
-                      ticks: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  },
-                  x: {
-                      grid: {
-                          color: 'rgba(255, 255, 255, 0.1)'
-                      },
-                      ticks: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              },
-              plugins: {
-                  legend: {
-                      labels: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              }
-          }
-      });
-      
-      const progressCtx1 = document.getElementById('progressChart1').getContext('2d');
-      const progressChart1 = new Chart(progressCtx1, {
-          type: 'doughnut',
-          data: {
-              labels: ['Completed', 'In Progress', 'Not Started'],
-              datasets: [{
-                  data: [12.5, 75, 12.5],
-                  backgroundColor: [
-                      'rgba(75, 192, 192, 0.7)',
-                      'rgba(255, 206, 86, 0.7)',
-                      'rgba(255, 99, 132, 0.7)'
-                  ],
-                  borderColor: [
-                      'rgba(75, 192, 192, 1)',
-                      'rgba(255, 206, 86, 1)',
-                      'rgba(255, 99, 132, 1)'
-                  ],
-                  borderWidth: 1
-              }]
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                  legend: {
-                      position: 'bottom',
-                      labels: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              }
-          }
-      });
-      
-      // Project 2 Charts
-      const completionCtx2 = document.getElementById('completionChart2').getContext('2d');
-      const completionChart2 = new Chart(completionCtx2, {
-          type: 'bar',
-          data: {
-              labels: ['Foundation', 'Pier', 'Deck', 'Steel', 'Concrete', 'Guardrail', 'Asphalt', 'Lighting'],
-              datasets: [
-                  {
-                      label: 'Completed (%)',
-                      data: [70, 50, 25, 50, 40, 0, 0, 0],
-                      backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                      borderColor: 'rgba(54, 162, 235, 1)',
-                      borderWidth: 1
-                  },
-                  {
-                      label: 'Target (%)',
-                      data: [80, 65, 40, 60, 50, 20, 10, 5],
-                      backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                      borderColor: 'rgba(255, 99, 132, 1)',
-                      borderWidth: 1
-                  }
-              ]
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                  y: {
-                      beginAtZero: true,
-                      max: 100,
-                      grid: {
-                          color: 'rgba(255, 255, 255, 0.1)'
-                      },
-                      ticks: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  },
-                  x: {
-                      grid: {
-                          color: 'rgba(255, 255, 255, 0.1)'
-                      },
-                      ticks: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              },
-              plugins: {
-                  legend: {
-                      labels: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              }
-          }
-      });
-      
-      const progressCtx2 = document.getElementById('progressChart2').getContext('2d');
-      const progressChart2 = new Chart(progressCtx2, {
-          type: 'doughnut',
-          data: {
-              labels: ['Completed', 'In Progress', 'Not Started'],
-              datasets: [{
-                  data: [0, 62.5, 37.5],
-                  backgroundColor: [
-                      'rgba(75, 192, 192, 0.7)',
-                      'rgba(255, 206, 86, 0.7)',
-                      'rgba(255, 99, 132, 0.7)'
-                  ],
-                  borderColor: [
-                      'rgba(75, 192, 192, 1)',
-                      'rgba(255, 206, 86, 1)',
-                      'rgba(255, 99, 132, 1)'
-                  ],
-                  borderWidth: 1
-              }]
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                  legend: {
-                      position: 'bottom',
-                      labels: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              }
-          }
-      });
-      
-      // Project 3 Charts
-      const completionCtx3 = document.getElementById('completionChart3').getContext('2d');
-      const completionChart3 = new Chart(completionCtx3, {
-          type: 'bar',
-          data: {
-              labels: ['Excavation', 'Pipe', 'Manhole', 'Catch Basin', 'Backfill', 'Surface', 'Testing'],
-              datasets: [
-                  {
-                      label: 'Completed (%)',
-                      data: [40, 30, 30, 25, 30, 20, 0],
-                      backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                      borderColor: 'rgba(54, 162, 235, 1)',
-                      borderWidth: 1
-                  },
-                  {
-                      label: 'Target (%)',
-                      data: [70, 60, 55, 50, 45, 40, 30],
-                      backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                      borderColor: 'rgba(255, 99, 132, 1)',
-                      borderWidth: 1
-                  }
-              ]
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                  y: {
-                      beginAtZero: true,
-                      max: 100,
-                      grid: {
-                          color: 'rgba(255, 255, 255, 0.1)'
-                      },
-                      ticks: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  },
-                  x: {
-                      grid: {
-                          color: 'rgba(255, 255, 255, 0.1)'
-                      },
-                      ticks: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              },
-              plugins: {
-                  legend: {
-                      labels: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              }
-          }
-      });
-      
-      const progressCtx3 = document.getElementById('progressChart3').getContext('2d');
-      const progressChart3 = new Chart(progressCtx3, {
-          type: 'doughnut',
-          data: {
-              labels: ['Completed', 'In Progress', 'Not Started'],
-              datasets: [{
-                  data: [0, 85.7, 14.3],
-                  backgroundColor: [
-                      'rgba(75, 192, 192, 0.7)',
-                      'rgba(255, 206, 86, 0.7)',
-                      'rgba(255, 99, 132, 0.7)'
-                  ],
-                  borderColor: [
-                      'rgba(75, 192, 192, 1)',
-                      'rgba(255, 206, 86, 1)',
-                      'rgba(255, 99, 132, 1)'
-                  ],
-                  borderWidth: 1
-              }]
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                  legend: {
-                      position: 'bottom',
-                      labels: {
-                          color: 'rgba(255, 255, 255, 0.7)'
-                      }
-                  }
-              }
-          }
-      });
-    }
 });
 </script>
