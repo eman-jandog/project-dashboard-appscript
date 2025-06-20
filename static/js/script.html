@@ -229,24 +229,24 @@ function createSlide(project, cardsData) {
 
     cardsData.forEach(c => {
         const card = document.createElement('div');
-        card.classList.add("stats-card", "bg-gradient-to-br", "from-blue-600", "to-blue-800", "p-4", "rounded-xl");
+        card.className = "stats-card bg-gradient-to-br from-blue-600 to-blue-800 p-4 rounded-xl";
 
         const h3 = document.createElement('h3');
-        h3.classList.add("text-sm","font-medium", "opacity-80");
+        h3.className = "text-sm font-medium opacity-80";
         h3.textContent = c.card;
 
         const stats = document.createElement('div');
-        stats.classList.add('flex', 'items-end','justify-between','mt-2');
+        stats.className = 'flex items-end justify-between mt-2';
 
         const main = document.createElement('p')
-        main.classList.add('text-3xl','font-bold');
+        main.className = 'text-3xl font-bold';
         main.textContent = c.main;
 
         const subStat = document.createElement('div');
         subStat.classList.add('text-right');
 
         const subTitle = document.createElement('p');
-        subTitle.classList.add('text-xs', 'opacity-70');
+        subTitle.className = 'text-xs opacity-70';
         subTitle.textContent = c.subtitle;
 
         subStat.append(subTitle)
