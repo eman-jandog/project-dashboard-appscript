@@ -1,7 +1,5 @@
 <script>
-// Dashboard Functionality
-const slides = document.querySelectorAll('.slide');
-const progressBars = document.querySelectorAll('.progress');
+// STATIC NODES
 const pauseBtn = document.getElementById('pauseBtn');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
@@ -9,61 +7,14 @@ const slideIndicator = document.getElementById('slideIndicator');
 const fullscreenMessage = document.getElementById('fullscreenMessage');
 const presentationToggle = document.getElementById('presentationToggle');
 const exitPresentation = document.getElementById('exitPresentation');
-const projectCards = document.querySelectorAll('.project-card');
 
+// BASIC CONF
 let currentSlide = 0;
 let slideDuration = 15000; // 15 seconds per slide
 let slideInterval;
 let isPaused = false;
 
-// Set up progress rings
-function setProgressRing(id, percentage) {
-    const circle = document.getElementById(id);
-    const radius = circle.r.baseVal.value;
-    const circumference = radius * 2 * Math.PI;
-    
-    circle.style.strokeDasharray = `${circumference} ${circumference}`;
-    const offset = circumference - (percentage / 100) * circumference;
-    circle.style.strokeDashoffset = offset;
-}
-
-// Initialize progress rings
-setProgressRing('progress-ring-1', 42);
-setProgressRing('progress-ring-2', 35);
-setProgressRing('progress-ring-3', 28);
-
-// Toggle presentation mode
-presentationToggle.addEventListener('click', () => {
-    document.body.classList.add('presentation-mode');
-    showSlide(0);
-    startSlideshow();
-    
-    // Show fullscreen message
-    fullscreenMessage.classList.add('show');
-    setTimeout(() => {
-        fullscreenMessage.classList.remove('show');
-    }, 5000);
-});
-
-// Exit presentation mode
-exitPresentation.addEventListener('click', () => {
-    document.body.classList.remove('presentation-mode');
-    clearInterval(slideInterval);
-    resetProgress();
-});
-
-// Project card click handlers
-projectCards.forEach(card => {
-    card.addEventListener('click', (e) => {
-        if (e.target.classList.contains('view-details-btn') || e.target.closest('.view-details-btn')) {
-            const projectId = card.getAttribute('data-project');
-            document.body.classList.add('presentation-mode');
-            goToSlide(parseInt(projectId) - 1);
-            startSlideshow();
-        }
-    });
-});
-
+// CLIENT-SIDE CONTROL FUNCTIONS
 function startSlideshow() {
     clearInterval(slideInterval);
     slideInterval = setInterval(() => {
@@ -124,7 +75,27 @@ function goToSlide(index) {
     startSlideshow();
 }
 
-// Event listeners
+// EVENT LISTERNER
+// Toggle presentation mode
+presentationToggle.addEventListener('click', () => {
+    document.body.classList.add('presentation-mode');
+    showSlide(0);
+    startSlideshow();
+    
+    // Show fullscreen message
+    fullscreenMessage.classList.add('show');
+    setTimeout(() => {
+        fullscreenMessage.classList.remove('show');
+    }, 5000);
+});
+
+// Exit presentation mode
+exitPresentation.addEventListener('click', () => {
+    document.body.classList.remove('presentation-mode');
+    clearInterval(slideInterval);
+    resetProgress();
+});
+
 pauseBtn.addEventListener('click', () => {
     isPaused = !isPaused;
     pauseBtn.innerHTML = isPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
@@ -165,6 +136,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// ONLOAD NODES
 // Create Slide
 function createSlide(project, cardsData) {
     // Create Slides
@@ -449,7 +421,73 @@ function createSlide(project, cardsData) {
     document.body.append(slide);
 }
 
+// Design Dashboards
 function createDashboard(overallChartData) {
+    // Simplf Data
+    const label = overallChartData.label;
+    const target = overallChartData.target;
+    const completed = overallChartData.completed;
+    const done = overallChartData.done;
+    const activities = overallChartData.activities;
+    const onTrack = overallChartData.onTrack;
+    const onComplete = overallChartData.onComplete;
+
+    // Get Nodes
+    const updatedDate = document.getElementById('updated-date');
+    const projectCount = document.getElementById('project-count');
+    const avgCompletion = document.getElementById('avg-completion');
+    const targetAmount = document.getElementById('target-amount');
+    const doneActv = document.getElementById('done-actv');
+    const remainActv = document.getElementById('remain-actv');
+    const projectOnTrack = document.getElementById('project-ontrack');
+    const projectComplete = document.getElementById('project-complete');
+
+    const progressBars = document.querySelectorAll('.progress');
+    const projectCards = document.querySelectorAll('.project-card');
+
+    // Setup Header
+    updatedDate.textContent = `Last Updated: ${new Date()}`;
+    projectCount.textContent = `${label.length} Active Projects`;
+
+    // Setup Cards
+    avgCompletion.textContent = `${Math.ceil((completed/target)*100)}%`;
+    targetAmount.textContent = `Target: ${target}`
+    doneActv.textContent = `${done}/${activities}`
+    remainActv.textContent = `Remaining: ${activities-done}`;
+    projectOnTrack.textContent = `${onTrack}/${label.length-onComplete}`;
+    projectComplete.textContent = `Completed: ${onComplete}`;
+
+
+    // Set up progress rings
+    function setProgressRing(id, percentage) {
+        const circle = document.getElementById(id);
+        const radius = circle.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        const offset = circumference - (percentage / 100) * circumference;
+        circle.style.strokeDashoffset = offset;
+    }
+
+    // Initialize progress rings
+    setProgressRing('progress-ring-1', 42);
+    setProgressRing('progress-ring-2', 35);
+    setProgressRing('progress-ring-3', 28);     
+    
+    // Project card click handlers
+    projectCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.classList.contains('view-details-btn') || e.target.closest('.view-details-btn')) {
+                const projectId = card.getAttribute('data-project');
+                document.body.classList.add('presentation-mode');
+                goToSlide(parseInt(projectId) - 1);
+                startSlideshow();
+            }
+        });
+    });
+
+
+    // Dashboar Charts
     const targetMax = Math.max(overallChartData.target)
     const overallCtx = document.getElementById('overallProgressChart').getContext('2d');
     const overallChart = new Chart(overallCtx, {
@@ -507,64 +545,57 @@ function createDashboard(overallChartData) {
     });
 }
 
-
-// Iniatiate Setting Data
+// Setup Data
 function setProjectData(projects) {
     // Create Data for Overall chart
     const overallChartData = {
         label: [],
         completed: [],
         target: [],
-        backgroundColor: [],
-        borderColor: []
-    }
+        done: 0,
+        activities: 0,
+        onTrack: 0,
+        onComplete: 0
+    }   
 
     for (const project of projects) {
         const totalRow = project.projectData.values.filter(row => row[0] == 'Total');
-        overallChartData.label.push(project.name);
-
-        // Create cards data
+        
+        // Create Cards Data
         const cardsData = new Array(4);
 
-        // For deadline card
+        // Deadline Card
         const msDiff = new Date(project.deadline) - new Date();
         const daysCount = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
         cardsData[2] = {
             card: 'Days Remaining',
             main: daysCount,
             subtitle: 'On Schedule'
-        }
-        
+        }        
+
         project.projectData.headers.forEach((item, index) => {
-            if (item == 'Completed') {
-                const [completed, target] = totalRow[0].filter((val,i) => i == index || i == index+1);
-                
-                overallChartData.completed.push(completed);
-                overallChartData.target.push(target)
-
-                const percentage = Math.round((completed / target) * 100);
-                cardsData[0] = {
-                    card: 'Overall Completion',
-                    main: `${percentage}%`,
-                    subtitle: `Target: ${target}`
-                }
-            }
-
+            // Completed Activities
             if (/Balance.*/.test(item)) {
                 let doneActivites = 0;
+                let activities = 0;
                 project.projectData.values.forEach((val, i) => {
                     if (!val[index]) {
                         doneActivites++;
                     }
+                    activities++;   
                 })
+
                 cardsData[1] = {
                     card: 'Activities Completed',
                     main: `${doneActivites}/${project.projectData.values[0].length - 1}`,
                     subtitle: `Remaining: ${project.projectData.values[0].length - 1 - doneActivites}`
                 }
-            }
 
-            if (/Work.*/.test(item)) {
+                overallChartData.done += doneActivites;
+                overallChartData.activities += activities;
+            }
+            // Progress
+            else if (/Work.*/.test(item)) {
                 const [accomplished] = totalRow[0].filter((val,i) => i == index);
                 cardsData[3] = {
                     card: '3-Day Progress',
@@ -572,7 +603,32 @@ function setProjectData(projects) {
                     subtitle: 'Units completed'
                 }
             }
+            // Completion
+            if (item == 'Completed') {
+                const [completed, target] = totalRow[0].filter((val,i) => i == index || i == index+1);
+
+                const percentage = Math.round((completed / target) * 100);
+                cardsData[0] = {
+                    card: 'Overall Completion',
+                    main: `${percentage}%`,
+                    subtitle: `Target: ${target}`
+                }
+                
+                overallChartData.completed.push(completed);
+                overallChartData.target.push(target);
+            }
         })
+
+        overallChartData.label.push(project.name);
+        if (project.status == 'On Track') overallChartData.onTrack += 1;
+        else if (project.status == 'On Track') overallChartData.onComplete += 1;
+
+        // Slides indicator
+        const indicator = document.createElement('div');
+        indicator.classList.add('indicator');
+        if (index === 0) indicator.classList.add('active');
+        indicator.addEventListener('click', () => goToSlide(index));
+        slideIndicator.appendChild(indicator);
 
         createSlide(project, cardsData);
     }
@@ -594,14 +650,5 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .getDashboardData()
 
-});
-
-// Create slide indicators
-slides.forEach((_, index) => {
-    const indicator = document.createElement('div');
-    indicator.classList.add('indicator');
-    if (index === 0) indicator.classList.add('active');
-    indicator.addEventListener('click', () => goToSlide(index));
-    slideIndicator.appendChild(indicator);
 });
 </script>
