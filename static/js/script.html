@@ -7,6 +7,8 @@ const slideIndicator = document.getElementById('slideIndicator');
 const fullscreenMessage = document.getElementById('fullscreenMessage');
 const presentationToggle = document.getElementById('presentationToggle');
 const exitPresentation = document.getElementById('exitPresentation');
+const slides = new Array();
+const progressBars = new Array();
 
 // BASIC CONF
 let currentSlide = 0;
@@ -24,9 +26,9 @@ function startSlideshow() {
     }, slideDuration);
 }
 
-function resetProgress() {
-    progressBars.forEach(bar => {
-        bar.style.width = '0%';
+function resetProgress(index) {
+    progressBars.forEach((bar, i) => {
+        if (i != index) bar.style.width = '0%';
     });
 }
 
@@ -53,7 +55,7 @@ function showSlide(index) {
         });
         
         slides[index].classList.add('active');
-        resetProgress();
+        resetProgress(index);
         updateProgress();
     }
 }
@@ -76,7 +78,7 @@ function goToSlide(index) {
 }
 
 // EVENT LISTERNER
-// Toggle presentation mode
+//Toggle presentation mode
 presentationToggle.addEventListener('click', () => {
     document.body.classList.add('presentation-mode');
     showSlide(0);
@@ -136,7 +138,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ONLOAD NODES
+
 // Create Slide
 function createSlide(slideData) {
     // Create Slides
@@ -336,8 +338,6 @@ function createSlide(slideData) {
         divCharts.append(chartCard);
     }
 
-    
-
     // Create Table
     const divTable = document.createElement('div');
     divTable.className = 'card bg-white bg-opacity-10 backdrop-blur-lg p-4';
@@ -394,6 +394,9 @@ function createSlide(slideData) {
     slide.appendChild(outerDiv, divProgress);
 
     document.body.append(slide);
+
+    progressBars.push(divProgress);
+    slides.push(slide);
 }
 
 // Design Dashboards
@@ -436,7 +439,6 @@ function createDashboard(dashboardData, projects) {
     remainActv.textContent = `Remaining: ${sumActivities - sumDone}`;
     projectOnTrack.textContent = `${onTrack}/${projects.length - onComplete}`;
     projectComplete.textContent = `Completed: ${onComplete}`;
-
 
     // Dashboard Charts
     const targetMax = Math.max(dashboardData.totalTarget)
@@ -699,13 +701,11 @@ document.addEventListener('DOMContentLoaded', function() {
     google.script.run
         .withSuccessHandler(({ projects }) => {
             setProjectData(projects);
-
         })
         .withFailureHandler(error => {
             console.error(error.message)
             return
         })
         .getDashboardData()
-
 });
 </script>
