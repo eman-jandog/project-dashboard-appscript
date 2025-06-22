@@ -1,0 +1,48 @@
+dashboard data:
+Header:
+All project
+
+Status Cards:
+1. All Completion:
+   All Target Units:
+
+2. All Activities
+   All Completed
+
+3. Project on Track: 
+   All Project Count
+
+4. All Completed in 3 Days:
+
+Charts:
+1. Project List
+2. Each Project completion
+3. Each Project target
+4. Max Target count
+
+Project Summary:
+1. Each Project Name
+2.	ID
+3.	location
+4.	deadline
+5.	days left
+6.	completed activities
+
+
+SLIDES
+Header:
+Name, ID, location, deadline, status
+
+Cards:
+1. Total Project completion in percentage
+2. Total target
+3. Total Activities and
+
+Charts:
+1. list of activities with completion and target, max target amount
+2. list of status, completed, in progress, not started
+
+Table:
+description
+headers
+values
