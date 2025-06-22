@@ -38,7 +38,7 @@ class App {
           deadline:  deadline,
           location: location,
           status: status,
-          projectData: {
+          table: {
             headers: headers,
             values: values
           }

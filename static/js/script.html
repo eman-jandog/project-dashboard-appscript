@@ -397,89 +397,65 @@ function createSlide(slideData) {
 }
 
 // Design Dashboards
-function createDashboard(overallChartData) {
+function createDashboard(dashboardData, projects) {
     // Simplf Data
-    const label = overallChartData.label;
-    const target = overallChartData.target;
-    const completed = overallChartData.completed;
-    const done = overallChartData.done;
-    const activities = overallChartData.activities;
-    const onTrack = overallChartData.onTrack;
-    const onComplete = overallChartData.onComplete;
+    const projects = dashboardData.projects;
+    const totalTarget = dashboardData.totalTarget;
+    const totalCompleted = dashboardData.totalCompleted;
+    const totalDone = dashboardData.totalDone;
+    const totalActivities = dashboardData.totalActivities;
+    const onTrack = dashboardData.onTrack;
+    const onComplete = dashboardData.onComplete;
 
     // Get Nodes
     const updatedDate = document.getElementById('updated-date');
-    const projectCount = document.getElementById('slideData-count');
+    const projectCount = document.getElementById('project-count');
     const avgCompletion = document.getElementById('avg-completion');
     const targetAmount = document.getElementById('target-amount');
     const doneActv = document.getElementById('done-actv');
     const remainActv = document.getElementById('remain-actv');
-    const projectOnTrack = document.getElementById('slideData-ontrack');
-    const projectComplete = document.getElementById('slideData-complete');
+    const projectOnTrack = document.getElementById('project-ontrack');
+    const projectComplete = document.getElementById('project-complete');
 
     const progressBars = document.querySelectorAll('.progress');
-    const projectCards = document.querySelectorAll('.slideData-card');
+    const projectCards = document.querySelectorAll('.project-card');
 
-    // Setup Header
+    // Header
     updatedDate.textContent = `Last Updated: ${new Date()}`;
-    projectCount.textContent = `${label.length} Active Projects`;
+    projectCount.textContent = `${projects.length} Active Projects`;
 
-    // Setup Cards
-    avgCompletion.textContent = `${Math.ceil((completed/target)*100)}%`;
-    targetAmount.textContent = `Target: ${target}`
-    doneActv.textContent = `${done}/${activities}`
-    remainActv.textContent = `Remaining: ${activities-done}`;
-    projectOnTrack.textContent = `${onTrack}/${label.length-onComplete}`;
+    // Summary Stats
+    const sumCompleted = totalCompleted.reduce((sum, item) => sum + item);
+    const sumTarget = totalCompleted.reduce((sum, item) => sum + item);
+    const sumDone = totalDone.reduce((sum, item) => sum + item);
+    const sumActivities = totalActivities.reduce((sum, item) => sum + item);
+
+    avgCompletion.textContent = `${Math.ceil((sumCompleted/sumTarget)*100)}%`;
+    targetAmount.textContent = `Target: ${sumTarget}`
+    doneActv.textContent = `${sumDone}/${sumActivities}`
+    remainActv.textContent = `Remaining: ${sumActivities - sumDone}`;
+    projectOnTrack.textContent = `${onTrack}/${projects.length - onComplete}`;
     projectComplete.textContent = `Completed: ${onComplete}`;
 
 
-    // Set up progress rings
-    function setProgressRing(id, percentage) {
-        const circle = document.getElementById(id);
-        const radius = circle.r.baseVal.value;
-        const circumference = radius * 2 * Math.PI;
-        
-        circle.style.strokeDasharray = `${circumference} ${circumference}`;
-        const offset = circumference - (percentage / 100) * circumference;
-        circle.style.strokeDashoffset = offset;
-    }
-
-    // Initialize progress rings
-    setProgressRing('progress-ring-1', 42);
-    setProgressRing('progress-ring-2', 35);
-    setProgressRing('progress-ring-3', 28);     
-    
-    // Project card click handlers
-    projectCards.forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (e.target.classList.contains('view-details-btn') || e.target.closest('.view-details-btn')) {
-                const projectId = card.getAttribute('data-slideData');
-                document.body.classList.add('presentation-mode');
-                goToSlide(parseInt(projectId) - 1);
-                startSlideshow();
-            }
-        });
-    });
-
-
-    // Dashboar Charts
-    const targetMax = Math.max(overallChartData.target)
+    // Dashboard Charts
+    const targetMax = Math.max(dashboardData.totalTarget)
     const overallCtx = document.getElementById('overallProgressChart').getContext('2d');
     const overallChart = new Chart(overallCtx, {
         type: 'bar',
         data: {
-            labels: overallChartData.label,
+            labels: dashboardData.label,
             datasets: [
                 {
                     label: 'Current Completion (%)',
-                    data: overallChartData.completed,
+                    data: dashboardData.completed,
                     backgroundColor: ['rgba(74, 222, 128, 0.7)', 'rgba(250, 204, 21, 0.7)', 'rgba(248, 113, 113, 0.7)'],
                     borderColor: ['rgba(74, 222, 128, 1)', 'rgba(250, 204, 21, 1)', 'rgba(248, 113, 113, 1)'],
                     borderWidth: 1
                 },
                 {
                     label: 'Target Completion (%)',
-                    data: overallChartData.target,
+                    data: dashboardData.target,
                     backgroundColor: 'rgba(99, 102, 241, 0.7)',
                     borderColor: 'rgba(99, 102, 241, 1)',
                     borderWidth: 1
@@ -518,51 +494,139 @@ function createDashboard(overallChartData) {
             }
         }
     });
+
+    // Project Cards
+    const circumference = 32 * 2 * Math.PI;
+    const cardsContainer = document.getElementById('project-cards-container');
+    project.forEach((project, i) => {
+        
+        const percentage = Math.ceil((project.charts.completed / project.charts.activities.length) * 100);
+
+        const projectCard = document.createElement('div');
+        projectCard.setAttribute('data-project', i+1)
+        projectCard.className = "project-card card bg-white bg-opacity-10 backdrop-blur-lg p-5";
+        projectCard.innerHTML = `
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h3 class="text-lg font-semibold">${project.name}</h3>
+                <p class="text-sm opacity-70">ID: ${project.id}</p>
+            </div>
+            <div class="status-badge bg-opacity-20 border 
+            ${ 
+                project.status == 'On Track'
+                ? 'bg-green-500 text-green-300 border-green-500'
+                : project.status == 'Completed'
+                    ? 'bg-blue-500 text-blue-300 border-blue-500'
+                    : 'bg-red-500 text-red-300 border-red-500'
+            } 
+            ">
+            ${project.status}
+           </div>  
+        </div>
+
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <p class="text-sm opacity-70">Location: ${project.location}</p>
+                <p class="text-sm opacity-70">Deadline: ${project.deadline}</p>
+                <p class="text-sm opacity-70">Days Left: ${project.cards[2].value}}</p>
+            </div>
+            <div class="progress-ring-container">
+                <svg class="progress-ring" width="80" height="80">
+                    <circle class="progress-ring-circle" id="progress-ring-1"
+                        stroke="
+                        ${ 
+                            project.status == 'On Track'
+                            ? '#4ade80'
+                            : project.status == 'Completed' 
+                                ? '#93c5fd'
+                                : '#4ade80'
+                        }"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="32"
+                        cx="40"
+                        cy="40"
+                        style="
+                        strokeDasharray:'${circumference} ${circumference}';
+                        strokeDashoffset: '${circumference - (project.cards[0].value / 100) * circumference}';
+                        "
+                        />
+                </svg>
+                <div class="progress-ring-text 
+                ${ 
+                    project.status == 'On Track' 
+                    ? 'text-green-300'
+                    : project.status == 'Completed'
+                        ? 'text-blue-300 '
+                        : 'text-red-300'
+                } 
+                ">${project.cards[0].value}%</div>
+            </div>
+        </div>
+        
+
+        <div class="mt-4">
+            <div class="flex justify-between text-sm mb-1">
+                <span>Activities Completed:</span>
+                <span>${project.cards[1].value}</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+                <div class="bg-green-500 h-2 rounded-full" style="width: ${percentage}%"></div>
+            </div>
+        </div>
+
+        <div class="mt-4 flex justify-end items-center">
+            <button class="view-details-btn bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-1 px-3 rounded-lg transition-all">
+                View Details
+            </button>
+        </div>
+        `
+        // Project card click handlers
+        projectCard.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(e.target.classList.contains('view-details-btn') || e.target.closest('.view-details-btn')) {
+                const projectId = card.getAttribute('data-project');
+                document.body.classList.add('presentation-mode');
+                goToSlide(parseInt(projectId) - 1);
+                startSlideshow();
+            }
+
+        })
+
+        cardsContainer.appendChild(projectCard);
+    });
 }
 
 // Setup Data
 function setProjectData(projects) {
     // Create Data for Overall chart
-    const overallChartData = {
-        label: [],
-        completed: [],
-        target: [],
-        done: 0,
-        activities: 0,
+    const dashboardData = {
+        projects: [],
+        totalCompleted: [],
+        totalTarget: [],
+        totalDone: [],
+        totalActivities: [],
         onTrack: 0,
         onComplete: 0,
-        progress: 0,
     } 
 
-    for (const slideData of projects) {
+    for (const project of projects) {
         // simplify
-        const projectHeaders = slideData.projectData.headers;
-        const projectValues = slideData.projectData.values;
+        const projectHeaders = project.projectData.headers;
+        const projectValues = project.projectData.values;
+        project['cards'] = new Array(3);
+        project['charts'] = {};
 
-        const slideData = {
-            id: slideData.id,
-            name: slideData.name,
-            description: slideData.description,
-            deadline:  slideData.deadline,
-            location: slideData.location,
-            status: slideData.status,
-            cards: new Array(4),
-            charts: {},
-            table: {
-                headers: projectHeaders,
-                values: projectValues
-            }
-        };
 
         // Formating Activities and Status related data : GENERAL
         // Set Slide Charts Data
-        slideData.projectData.values.forEach((row, i) => {
+        projectValues.forEach((row, i) => {
             if (i < row.length-1) {
-                slideData.charts.activities ? slideData.charts.activities.push(row[0]) : slideData.charts.activities = [row[0]];
+                project.charts.activities ? slideData.charts.activities.push(row[0]) : slideData.charts.activities = [row[0]];
 
-                slideData.charts.targets ? slideData.charts.targets.push(row[row.length-1]) : slideData.charts.targets = [row[row.length-1]];
+                project.charts.targets ? slideData.charts.targets.push(row[row.length-1]) : slideData.charts.targets = [row[row.length-1]];
 
-                slideData.charts.completed ? slideData.charts.completed.push(row[row.length-2]) : slideData.charts.completed = [row[row.length-2]];
+                project.charts.completed ? slideData.charts.completed.push(row[row.length-2]) : slideData.charts.completed = [row[row.length-2]];
             }        
         })
 
@@ -578,19 +642,19 @@ function setProjectData(projects) {
                 activityStatus[1] ? activityStatus[1]++ : activityStatus[1] = 1;
             }
         }        
-        slideData.charts['activityStatus'] = activityStatus;
+        project.charts['activityStatus'] = activityStatus;
 
         // Set Slides Cards Data
         const [totalTarget, totalComplete] = projectValues[-1].slice(-2);
         const percentage = Math.round((totalComplete / totalTarget) * 100);
         // card1
-        slideData.cards[0] = {
+        project.cards[0] = {
             card: 'Overall Completion',
             value: `${percentage}%`,
             description: `Target: ${target}`
         }
         // card2
-        cardsData[1] = {
+        project.cards[1] = {
             card: 'Activities Completed',
             value: `${slideData.charts.activityStatus[0]}/${slideData.charts.activities.length}`,
             description: `Remaining: ${slideData.charts.activities.length - slideData.charts.activityStatus[0]}`
@@ -598,15 +662,23 @@ function setProjectData(projects) {
         // card3
         const msDiff = new Date(slideData.deadline) - new Date();
         const daysCount = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
-        cardsData[2] = {
+        project.cards[2] = {
             card: 'Days Remaining',
             value: daysCount,
             description: 'On Schedule'
         }               
 
-        overallChartData.label.push(slideData.name);
-        if (slideData.status == 'On Track') overallChartData.onTrack += 1;
-        else if (slideData.status == 'On Track') overallChartData.onComplete += 1;
+        dashboardData.projects.push(project.name);
+        dashboardData.totalCompleted.push(totalComplete);
+        dashboardData.totalTarget.push(totalTarget);
+        dashboardData.totalDone.push(project.charts.completed);
+        dashboardData.totalActivities.push(project.charts.activities);
+
+        if (slideData.status == 'On Track') {
+            dashboardData.onTrack += 1;
+        } else if (slideData.status == 'Completed') {
+            dashboardData.onComplete += 1;
+        }
 
         // Slides indicator
         const indicator = document.createElement('div');
@@ -615,10 +687,10 @@ function setProjectData(projects) {
         indicator.addEventListener('click', () => goToSlide(index));
         slideIndicator.appendChild(indicator);
 
-        createSlide(slideData);
+        createSlide(project);
     }
 
-    createDashboard(overallChartData);
+    createDashboard(dashboardData, projects);
 }
 
 // Charts
