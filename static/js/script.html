@@ -8,17 +8,18 @@ const fullscreenMessage = document.getElementById('fullscreenMessage');
 const presentationToggle = document.getElementById('presentationToggle');
 const exitPresentation = document.getElementById('exitPresentation');
 const cardsContainer = document.getElementById('project-cards-container');
-const slides = new Array();
-const progressBars = new Array();
+let slides = new Array();
+let progressBars = new Array();
 
 
 
 // BASIC CONF
 let currentSlide = 0;
-let refreshTime = 1 * 60 * 1000; // Minutes * Seconds * Milliseconds
+let refreshTime = 30000; // Minutes * Seconds * Milliseconds
 let slideDuration = 15000; // 15 seconds per slide
 let slideInterval, progressInterval;
 let isPaused = false;
+let inPresentation = false;
 
 
 
@@ -98,6 +99,8 @@ presentationToggle.addEventListener('click', () => {
     setTimeout(() => {
         fullscreenMessage.classList.remove('show');
     }, 5000);
+
+    inPresentation = true;
 });
 
 // Exit presentation mode
@@ -105,6 +108,7 @@ exitPresentation.addEventListener('click', () => {
     document.body.classList.remove('presentation-mode');
     clearInterval(slideInterval);
     resetProgress();
+    inPresentation = false;
 });
 
 pauseBtn.addEventListener('click', () => {
@@ -407,7 +411,7 @@ function createSlide(project) {
 
     slide.append(outerDiv, divProgress);
 
-    document.body.insertBefore(document.querySelector('script'), slide);
+    document.body.insertBefore(slide, document.currentScript);
 
     progressBars.push(divProgress);
     slides.push(slide);
@@ -453,7 +457,9 @@ function createDashboard(dashboardData, projects) {
 
     // Dashboard Charts
     const targetMax = Math.max(totalTarget)
-    const overallCtx = document.getElementById('overallProgressChart').getContext('2d');
+    const chartCanva = document.createElement('canvas');
+    chartCanva.setAttribute('id', 'overallProgressChart');
+    const overallCtx = chartCanva.getContext('2d');
     const overallChart = new Chart(overallCtx, {
         type: 'bar',
         data: {
@@ -507,6 +513,7 @@ function createDashboard(dashboardData, projects) {
             }
         }
     });
+    document.querySelector('.chart-container').append(chartCanva);
 
     // Project Cards
     const circumference = 32 * 2 * Math.PI;
@@ -685,6 +692,9 @@ function fetchData() {
     google.script.run
     .withSuccessHandler(({ projects }) => {
         setProjectData(projects);
+        if (inPresentation) {
+            presentationToggle.click();
+        }
 
     })
     .withFailureHandler(error => {
@@ -696,11 +706,21 @@ function fetchData() {
 
 
 function refresh() {
+    // Clean before refreshing
+    slides = new Array();
+    progressBars = new Array();
+    document.querySelector('.chart-container').innerHTML = ''
     cardsContainer.innerHTML = '';
     slideIndicator.innerHTML = ''
     document.querySelectorAll('.slide').forEach(slide => {
         slide.remove();
     })
+    if (inPresentation) {
+        clearInterval(slideInterval);
+        clearInterval(progressInterval);
+    }
+
+    // Refresh
     fetchData();
 }
 
