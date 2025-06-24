@@ -7,14 +7,20 @@ const slideIndicator = document.getElementById('slideIndicator');
 const fullscreenMessage = document.getElementById('fullscreenMessage');
 const presentationToggle = document.getElementById('presentationToggle');
 const exitPresentation = document.getElementById('exitPresentation');
+const cardsContainer = document.getElementById('project-cards-container');
 const slides = new Array();
 const progressBars = new Array();
 
+
+
 // BASIC CONF
 let currentSlide = 0;
+let refreshTime = 1 * 60 * 1000; // Minutes * Seconds * Milliseconds
 let slideDuration = 15000; // 15 seconds per slide
-let slideInterval;
+let slideInterval, progressInterval;
 let isPaused = false;
+
+
 
 // CLIENT-SIDE CONTROL FUNCTIONS
 function startSlideshow() {
@@ -26,15 +32,16 @@ function startSlideshow() {
     }, slideDuration);
 }
 
-function resetProgress(index) {
+function resetProgress() {
     progressBars.forEach((bar, i) => {
-        if (i != index) bar.style.width = '0%';
+        bar.style.width = '0%';
     });
+    clearInterval(progressInterval);
 }
 
 function updateProgress() {
     let progress = 0;
-    const progressInterval = setInterval(() => {
+    progressInterval = setInterval(() => {
         if (isPaused) return;
         progress += 0.1;
         progressBars[currentSlide].style.width = `${progress}%`;
@@ -55,7 +62,7 @@ function showSlide(index) {
         });
         
         slides[index].classList.add('active');
-        resetProgress(index);
+        resetProgress();
         updateProgress();
     }
 }
@@ -76,6 +83,8 @@ function goToSlide(index) {
     clearInterval(slideInterval);
     startSlideshow();
 }
+
+
 
 // EVENT LISTERNER
 //Toggle presentation mode
@@ -137,6 +146,8 @@ document.addEventListener('keydown', (e) => {
         resetProgress();
     }
 });
+
+
 
 // Create Slide
 function createSlide(project) {
@@ -355,13 +366,15 @@ function createSlide(project) {
     const tableDiv = document.createElement('div');
     tableDiv.classList.add('table-container');
     const table = document.createElement('table');
-    table.classList.add('w-full');
+    table.className = 'w-full';
     const thead = document.createElement('thead');
     const rowHeaders = document.createElement('tr');
-    project.table.headers.forEach(header => {
+    project.table.headers.forEach((header, ind, headers) => {
+        if (ind >= headers.length-2) return null;
+        const match = header.indexOf('(');
         let tableHeader = document.createElement('th');
-        tableHeader.classList.add('text-center');
-        tableHeader.textContent = header;
+        tableHeader.className = 'text-center max-w-[132px]';
+        tableHeader.innerHTML = header;
         rowHeaders.appendChild(tableHeader);
     })
 
@@ -369,12 +382,13 @@ function createSlide(project) {
 
     const tbody = document.createElement('tbody');
     project.table.values.forEach((row, i) => {
-        if (i > row.length-1) return;
+        if (i >= row.length-1) return;
         const rowTable = document.createElement('tr');
         rowTable.className = 'hover:bg-white hover:bg-opacity-10';
-        row.forEach((data, i) => {
+        row.forEach((data, j) => {
+            if (j >= row.length-2) return;
             const rowValue = document.createElement('td');
-            if (i!=0) rowValue.classList.add('text-right')
+            if (j!=0) rowValue.classList.add('text-right')
             rowValue.textContent = data;
             rowTable.appendChild(rowValue);
         })
@@ -391,9 +405,9 @@ function createSlide(project) {
     divProgress.classList.add('progress-bar');
     divProgress.innerHTML = '<div class="progress"></div>';
 
-    slide.appendChild(outerDiv, divProgress);
+    slide.append(outerDiv, divProgress);
 
-    document.body.append(slide);
+    document.body.insertBefore(document.querySelector('script'), slide);
 
     progressBars.push(divProgress);
     slides.push(slide);
@@ -419,9 +433,6 @@ function createDashboard(dashboardData, projects) {
     const remainActv = document.getElementById('remain-actv');
     const projectOnTrack = document.getElementById('project-ontrack');
     const projectComplete = document.getElementById('project-complete');
-
-    const progressBars = document.querySelectorAll('.progress');
-    const projectCards = document.querySelectorAll('.project-card');
 
     // Header
     updatedDate.textContent = `Last Updated: ${new Date().toISOString()}`;
@@ -499,7 +510,6 @@ function createDashboard(dashboardData, projects) {
 
     // Project Cards
     const circumference = 32 * 2 * Math.PI;
-    const cardsContainer = document.getElementById('project-cards-container');
     projects.forEach((project, i) => {
         
         const percentage = Math.ceil((project.charts.activityStatus[0] / project.charts.activities.length) * 100);
@@ -666,21 +676,37 @@ function setProjectData(projects) {
         createSlide(project);
     });
 
-    console.log(projects)
     createDashboard(dashboardData, projects);
 }
 
-// Charts
-document.addEventListener('DOMContentLoaded', function() {
+
+function fetchData() {
     // Get Data
     google.script.run
-        .withSuccessHandler(({ projects }) => {
-            setProjectData(projects);
-        })
-        .withFailureHandler(error => {
-            console.error(error.message)
-            return
-        })
-        .getDashboardData()
+    .withSuccessHandler(({ projects }) => {
+        setProjectData(projects);
+
+    })
+    .withFailureHandler(error => {
+        console.error(error.message)
+        return
+    })
+    .getDashboardData()
+}
+
+
+function refresh() {
+    cardsContainer.innerHTML = '';
+    slideIndicator.innerHTML = ''
+    document.querySelectorAll('.slide').forEach(slide => {
+        slide.remove();
+    })
+    fetchData();
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchData();
+    setInterval(refresh,refreshTime);
 });
 </script>
