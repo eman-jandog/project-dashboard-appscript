@@ -15,16 +15,25 @@
         Press F11 for best fullscreen experience
     </div>
 
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-indigo-600 to-purple-700 flex flex-col items-center justify-center">
+        <div class="bg-white bg-opacity-10 rounded-xl p-8 flex flex-col items-center shadow-lg backdrop-blur-sm border border-white border-opacity-20">
+            <div class="loader h-20 w-20 border-4 border-indigo-200 border-t-indigo-500 rounded-full mb-4"></div>
+            <h2 class="text-white text-2xl font-bold mb-2 pulse">Loading Data</h2>
+            <p class="text-indigo-100 text-center">Please wait while we fetch the latest information...</p>
+        </div>
+    </div>
+
     <div class="presentation-toggle" id="presentationToggle">
-        <i class="fas fa-play"></i> Start Presentation
+        <i class="fas fa-play"></i>
     </div>
 
     <div class="exit-presentation" id="exitPresentation">
-        <i class="fas fa-times"></i> Exit Presentation
+        <i class="fas fa-times"></i>
     </div>
 
     <!-- Overview Dashboard -->
-    <div class="overview-container p-6">
+    <div id="mainContent" class="overview-container p-6">
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-3xl font-bold">PROJECT DASHBOARD</h1>
@@ -78,9 +87,12 @@
         
         <!-- Project Cards -->
         <h2 class="text-xl font-semibold mb-4">Project Summary</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="project-cards-container">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="projectCardsContainer">
         </div>
     </div>
+
+    <!-- Slides -->
+     <div id="slidesContainer"></div>
 
     <!-- Controls -->
     <div class="controls">

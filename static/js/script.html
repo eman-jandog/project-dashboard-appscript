@@ -7,7 +7,8 @@ const slideIndicator = document.getElementById('slideIndicator');
 const fullscreenMessage = document.getElementById('fullscreenMessage');
 const presentationToggle = document.getElementById('presentationToggle');
 const exitPresentation = document.getElementById('exitPresentation');
-const cardsContainer = document.getElementById('project-cards-container');
+const cardsContainer = document.getElementById('projectCardsContainer');
+const slidesContainer = document.getElementById('slidesContainer');
 let slides = new Array();
 let progressBars = new Array();
 
@@ -15,7 +16,7 @@ let progressBars = new Array();
 
 // BASIC CONF
 let currentSlide = 0;
-let refreshTime = 1 * 60 * 1000; // Minutes * Seconds * Milliseconds
+let refreshTime = 15 * 60 * 1000; // Minutes * Seconds * Milliseconds
 let slideDuration = 15000; // 15 seconds per slide
 let slideInterval, progressInterval;
 let isPaused = false;
@@ -194,7 +195,8 @@ function createSlide(project) {
     statusPanel.append(location, deadline);
 
     const status = document.createElement('div');
-    status.className = "status-badge bg-green-500 bg-opacity-20 text-green-300 border border-green-500";
+    
+    status.className = `status-badge bg-opacity-20 border ${project.status.trim() == 'On Track' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}`;
     status.innerHTML = project.status;
 
     headerDiv2.append(status, statusPanel);
@@ -411,7 +413,7 @@ function createSlide(project) {
 
     slide.append(outerDiv, divProgress);
 
-    document.body.insertBefore(slide, document.currentScript);
+    slidesContainer.appendChild(slide);
 
     progressBars.push(divProgress);
     slides.push(slide);
@@ -579,6 +581,7 @@ function createDashboard(dashboardData, projects) {
                 document.body.classList.add('presentation-mode');
                 goToSlide(i);
                 startSlideshow();
+                inPresentation = true;
             }
 
         })
@@ -590,112 +593,150 @@ function createDashboard(dashboardData, projects) {
 // Setup Data
 function setProjectData(projects) {
     // Create Data for Overall chart
-    const dashboardData = {
-        projects: [],
-        totalCompleted: [],
-        totalTarget: [],
-        totalDone: [],
-        totalActivities: [],
-        onTrack: 0,
-        onComplete: 0,
-    } 
+    try {
+        const dashboardData = {
+            projects: [],
+            totalCompleted: [],
+            totalTarget: [],
+            totalDone: [],
+            totalActivities: [],
+            onTrack: 0,
+            onComplete: 0,
+        } 
 
-    projects.forEach((project, index) => {
-        // simplify
-        const projectHeaders = project.table.headers;
-        const projectValues = project.table.values;
-        project['cards'] = new Array(3);
-        project['charts'] = {};
+        projects.forEach((project, index) => {
+            // simplify
+            const projectHeaders = project.table.headers;
+            const projectValues = project.table.values;
+            project['cards'] = new Array(3);
+            project['charts'] = {};
 
 
-        // Formating Activities and Status related data : GENERAL
-        // Set Slide Charts Data
-        projectValues.forEach((row, i) => {
-            if (i > row.length-1) return;
-            project.charts.activities ? project.charts.activities.push(row[0]) : project.charts.activities = [row[0]];
+            // Formating Activities and Status related data : GENERAL
+            // Set Slide Charts Data
+            projectValues.forEach((row, i) => {
+                if (i > row.length-1) return;
+                project.charts.activities ? project.charts.activities.push(row[0]) : project.charts.activities = [row[0]];
 
-            project.charts.targets ? project.charts.targets.push(row[row.length-1]) : project.charts.targets = [row[row.length-1]];
+                project.charts.targets ? project.charts.targets.push(row[row.length-1]) : project.charts.targets = [row[row.length-1]];
 
-            project.charts.completed ? project.charts.completed.push(row[row.length-2]) : project.charts.completed = [row[row.length-2]];
-        })
+                project.charts.completed ? project.charts.completed.push(row[row.length-2]) : project.charts.completed = [row[row.length-2]];
+            })
 
-        const activityStatus = new Array(3).fill(0);
-        for (let i=0; i<project.charts.completed.length; i++) {
-            if (project.charts.completed[i] == project.charts.targets[i]) {
-                activityStatus[0] ? activityStatus[0]++ : activityStatus[0] = 1;
+            const activityStatus = new Array(3).fill(0);
+            for (let i=0; i<project.charts.completed.length; i++) {
+                if (project.charts.completed[i] == project.charts.targets[i]) {
+                    activityStatus[0] ? activityStatus[0]++ : activityStatus[0] = 1;
+                }
+                else if (!project.charts.completed[i]) {
+                    activityStatus[2] ? activityStatus[2]++ : activityStatus[2] = 1;
+                }
+                else {
+                    activityStatus[1] ? activityStatus[1]++ : activityStatus[1] = 1;
+                }
+            }        
+            project.charts['activityStatus'] = activityStatus;
+
+            // Set Slides Cards Data
+            const [totalCompleted, totalTarget] = projectValues[projectValues.length-1].slice(-2);
+            const percentage = Math.round((totalCompleted / totalTarget) * 100);
+            // card1
+            project.cards[0] = {
+                card: 'Overall Completion',
+                value: `${percentage}%`,
+                description: `Target: ${totalTarget}`
             }
-            else if (!project.charts.completed[i]) {
-                activityStatus[2] ? activityStatus[2]++ : activityStatus[2] = 1;
+            // card2
+            project.cards[1] = {
+                card: 'Activities Completed',
+                value: `${project.charts.activityStatus[0]}/${project.charts.activities.length}`,
+                description: `Remaining: ${project.charts.activities.length - project.charts.activityStatus[0]}`
             }
-            else {
-                activityStatus[1] ? activityStatus[1]++ : activityStatus[1] = 1;
+            // card3
+            const msDiff = new Date(project.deadline) - new Date();
+            const daysCount = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
+            project.cards[2] = {
+                card: 'Days Remaining',
+                value: daysCount,
+                description: 'On Schedule'
+            }               
+
+            dashboardData.projects.push(project.name);
+            dashboardData.totalCompleted.push(totalCompleted);
+            dashboardData.totalTarget.push(totalTarget);
+            dashboardData.totalDone.push(project.charts.activityStatus[0]);
+            dashboardData.totalActivities.push(project.charts.activities.length);
+
+            if (project.status == 'On Track') {
+                dashboardData.onTrack += 1;
+            } else if (project.status == 'Completed') {
+                dashboardData.onComplete += 1;
             }
-        }        
-        project.charts['activityStatus'] = activityStatus;
 
-        // Set Slides Cards Data
-        const [totalCompleted, totalTarget] = projectValues[projectValues.length-1].slice(-2);
-        const percentage = Math.round((totalCompleted / totalTarget) * 100);
-        // card1
-        project.cards[0] = {
-            card: 'Overall Completion',
-            value: `${percentage}%`,
-            description: `Target: ${totalTarget}`
-        }
-        // card2
-        project.cards[1] = {
-            card: 'Activities Completed',
-            value: `${project.charts.activityStatus[0]}/${project.charts.activities.length}`,
-            description: `Remaining: ${project.charts.activities.length - project.charts.activityStatus[0]}`
-        }
-        // card3
-        const msDiff = new Date(project.deadline) - new Date();
-        const daysCount = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
-        project.cards[2] = {
-            card: 'Days Remaining',
-            value: daysCount,
-            description: 'On Schedule'
-        }               
+            // Slides indicator
+            const indicator = document.createElement('div');
+            indicator.classList.add('indicator');
+            if (index === 0) indicator.classList.add('active');
+            indicator.addEventListener('click', () => goToSlide(index));
+            slideIndicator.appendChild(indicator);
 
-        dashboardData.projects.push(project.name);
-        dashboardData.totalCompleted.push(totalCompleted);
-        dashboardData.totalTarget.push(totalTarget);
-        dashboardData.totalDone.push(project.charts.activityStatus[0]);
-        dashboardData.totalActivities.push(project.charts.activities.length);
+            createSlide(project);
+        });
 
-        if (project.status == 'On Track') {
-            dashboardData.onTrack += 1;
-        } else if (project.status == 'Completed') {
-            dashboardData.onComplete += 1;
-        }
+        createDashboard(dashboardData, projects);
 
-        // Slides indicator
-        const indicator = document.createElement('div');
-        indicator.classList.add('indicator');
-        if (index === 0) indicator.classList.add('active');
-        indicator.addEventListener('click', () => goToSlide(index));
-        slideIndicator.appendChild(indicator);
-
-        createSlide(project);
-    });
-
-    createDashboard(dashboardData, projects);
+        return true;
+    } catch(error) {
+        console.error('Fetch: ', error.message);
+    }    
 }
 
 
+// Function to show loading screen
+function showLoading() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainContent = document.getElementById('mainContent');
+    
+    loadingScreen.classList.remove('hidden');
+    loadingScreen.classList.remove('fade-out');
+    loadingScreen.classList.add('fade-in');
+    
+    mainContent.classList.add('hidden');
+}
+
+// Function to hide loading screen
+function hideLoading() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainContent = document.getElementById('mainContent');
+    
+    loadingScreen.classList.add('fade-out');
+    
+    setTimeout(() => {
+        loadingScreen.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+        mainContent.classList.add('fade-in');
+    }, 1000);
+}
+
+
+
 function fetchData() {
+    showLoading();
+
     // Get Data
     google.script.run
-    .withSuccessHandler(({ projects }) => {
-        setProjectData(projects);
-        if (inPresentation) {
+    .withSuccessHandler( async({ projects }) => {
+        const response = await setProjectData(projects);
+        if (response && inPresentation) {
             presentationToggle.click();
         }
+        hideLoading();
 
     })
     .withFailureHandler(error => {
-        console.error(error.message)
-        return
+        console.error(error)
+        hideLoading();
+        alert('Failed to load data. Please try again.');
     })
     .getDashboardData()
 }

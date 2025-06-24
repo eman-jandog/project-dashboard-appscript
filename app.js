@@ -10,12 +10,19 @@ class App {
       const projects = [];
       for (const sheet of sheets) {
         const sheetName = sheet.getSheetName();
+
+        if (sheetName.match(/draft/)) continue;
+
         const name = sheet.getRange('A1').getValue();
         const description = sheet.getRange('A2').getValue();
         const id = sheet.getRange('B4').getValue();
         const deadline = sheet.getRange('B5').getValue().toLocaleString('en-ph', { year: 'numeric', month: 'numeric', day: 'numeric'});
         const location = sheet.getRange('D4').getValue();
         const status = sheet.getRange('D5').getValue();
+
+        if (!name || !description || !id || !deadline || !location || !status) {
+          throw new Error(`Missing information in sheet ${sheetName}`);
+        }
 
         const pt = sheet.getDataRange().getValues();
         const headers = [];
@@ -52,11 +59,14 @@ class App {
 }
 
 function getDashboardData() {
-    const app = new App();
+  const app = new App();
+  try {
     const data = app.getProjectsData();
-
     if (!data) throw new Error(`Resulting project data is empty.`);
     return {projects: data};
+  } catch (e) {
+    throw new Error(e.message);
+  }
 }
 
 
