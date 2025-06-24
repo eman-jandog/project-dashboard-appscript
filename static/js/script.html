@@ -15,7 +15,7 @@ let progressBars = new Array();
 
 // BASIC CONF
 let currentSlide = 0;
-let refreshTime = 30000; // Minutes * Seconds * Milliseconds
+let refreshTime = 1 * 60 * 1000; // Minutes * Seconds * Milliseconds
 let slideDuration = 15000; // 15 seconds per slide
 let slideInterval, progressInterval;
 let isPaused = false;
@@ -542,16 +542,13 @@ function createDashboard(dashboardData, projects) {
             <div class="progress-ring-container">
                 <svg class="progress-ring" width="80" height="80">
                     <circle class="progress-ring-circle" id="progress-ring-1"
-                        stroke="${project.status.trim() == 'On Track' ? '#4ade80' : project.status.trim() == 'Completed' ? '#93c5fd' : '#4ade80'}"
+                        stroke="${project.status.trim() == 'On Track' ? '#4ade80' : project.status.trim() == 'Completed' ? '#0078ff' : '#ef4444'}"
                         stroke-width="8"
                         fill="transparent"
                         r="32"
                         cx="40"
                         cy="40"
-                        style="
-                        strokeDasharray:'${circumference} ${circumference}';
-                        strokeDashoffset: '${circumference - (project.cards[0].value / 100) * circumference}';
-                        "
+                        style="strokeDasharray:'${circumference} ${circumference}'; strokeDashoffset: '${circumference - (project.cards[0].value / 100) * circumference}';"
                         />
                 </svg>
                 <div class="progress-ring-text ${project.status.trim() == 'On Track' ? 'text-green-300' : project.status.trim() == 'Completed' ? 'text-blue-300 ' : 'text-red-300'}">${project.cards[0].value}</div>
@@ -565,7 +562,7 @@ function createDashboard(dashboardData, projects) {
                 <span>${project.cards[1].value}</span>
             </div>
             <div class="w-full bg-gray-700 rounded-full h-2">
-                <div class="bg-green-500 h-2 rounded-full" style="width:${percentage}%"></div>
+                <div class="${project.status.trim() == 'On Track' ? 'bg-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 ' : 'bg-red-500'} h-2 rounded-full" style="width:${percentage}%"></div>
             </div>
         </div>
 
@@ -579,9 +576,8 @@ function createDashboard(dashboardData, projects) {
         projectCard.addEventListener('click', (e) => {
             e.preventDefault();
             if(e.target.classList.contains('view-details-btn') || e.target.closest('.view-details-btn')) {
-                const projectId = card.getAttribute('data-project');
                 document.body.classList.add('presentation-mode');
-                goToSlide(parseInt(projectId) - 1);
+                goToSlide(i);
                 startSlideshow();
             }
 
