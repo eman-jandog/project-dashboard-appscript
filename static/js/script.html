@@ -550,7 +550,7 @@ function createDashboard(dashboardData, projects) {
                         r="32"
                         cx="40"
                         cy="40"
-                        style="strokeDasharray:'${circumference} ${circumference}'; strokeDashoffset: '${circumference - (project.cards[0].value / 100) * circumference}';"
+                        style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference - (parseInt(project.cards[0].value.slice(0,-1)) / 100) * circumference}; "
                         />
                 </svg>
                 <div class="progress-ring-text ${project.status.trim() == 'On Track' ? 'text-green-300' : project.status.trim() == 'Completed' ? 'text-blue-300 ' : 'text-red-300'}">${project.cards[0].value}</div>
@@ -718,8 +718,6 @@ function hideLoading() {
     }, 1000);
 }
 
-
-
 function fetchData() {
     showLoading();
 
@@ -740,7 +738,6 @@ function fetchData() {
     })
     .getDashboardData()
 }
-
 
 function refresh() {
     // Clean before refreshing
