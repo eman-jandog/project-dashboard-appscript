@@ -186,11 +186,11 @@ function createSlide(project) {
 
     const location = document.createElement('p');
     location.className = "text-sm opacity-70";
-    location.innerHTML = project.location;
+    location.innerHTML = `Location: ${project.location}`;
 
     const deadline = document.createElement('p');
     deadline.className = "text-sm opacity-70";
-    deadline.innerHTML = project.deadline;
+    deadline.innerHTML = `Deadline: ${project.deadline}`;
 
     statusPanel.append(location, deadline);
 
@@ -441,7 +441,7 @@ function createDashboard(dashboardData, projects) {
     const projectComplete = document.getElementById('project-complete');
 
     // Header
-    updatedDate.textContent = `Last Updated: ${new Date().toISOString()}`;
+    updatedDate.textContent = `Last Updated: ${new Date().toLocaleString('en-ph', { year: 'numeric', month: 'long', day: 'numeric'})}`;
     projectCount.textContent = projectList.length == 1 ? `${projectList.length} Active Project` : `${projectList.length} Active Projects`;
 
     // Summary Stats
