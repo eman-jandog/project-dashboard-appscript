@@ -20,8 +20,8 @@ class App {
         const location = sheet.getRange('D4').getValue();
         const status = sheet.getRange('D5').getValue();
 
-        if (!name || !description || !id || !deadline || !location || !status) {
-          throw new Error(`Missing information in sheet ${sheetName}`);
+        if (!name || !id || !location || !status) {
+          throw new Error(`Missing basic information in sheet ${sheetName}`);
         }
 
         const pt = sheet.getDataRange().getValues();
