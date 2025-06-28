@@ -16,11 +16,27 @@
     </div>
 
     <!-- Loading Screen -->
-    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-indigo-600 to-purple-700 flex flex-col items-center justify-center">
+    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-indigo-600 to-purple-700 flex flex-col items-center justify-center z-50 fade-in fade-out hidden">
         <div class="bg-white bg-opacity-10 rounded-xl p-8 flex flex-col items-center shadow-lg backdrop-blur-sm border border-white border-opacity-20">
-            <div class="loader h-20 w-20 border-4 border-indigo-200 border-t-indigo-500 rounded-full mb-4"></div>
-            <h2 class="text-white text-2xl font-bold mb-2 pulse">Loading Data</h2>
-            <p class="text-indigo-100 text-center">Please wait while we fetch the latest information...</p>
+            <div id="loadingSpinner" class="loader h-20 w-20 border-4 border-indigo-200 border-t-indigo-500 rounded-full mb-4"></div>
+            
+            <!-- Error Icon (hidden by default) -->
+            <div id="errorIcon" class="mb-4 hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            
+            <h2 id="loadingText" class="text-white text-2xl font-bold mb-2 pulse">Loading Data</h2>
+            <p id="loadingMessage" class="text-indigo-100 text-center">Please wait while we fetch the latest information...</p>
+            
+            <!-- Error message and retry button (hidden by default) -->
+            <div id="errorContainer" class="flex flex-col items-center mt-4 hidden">
+                <p id="errorMessage" class="text-red-200 text-center mb-4">Unable to fetch data. Please check your connection and try again.</p>
+                <button id="retryButton" class="bg-white text-indigo-700 hover:bg-indigo-100 font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+                    Retry
+                </button>
+            </div>
         </div>
     </div>
 

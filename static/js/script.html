@@ -12,13 +12,24 @@ const slidesContainer = document.getElementById('slidesContainer');
 let slides = new Array();
 let progressBars = new Array();
 
+// Loading Screen
+const loadingScreen = document.getElementById('loadingScreen');
+const mainContent = document.getElementById('mainContent');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const errorIcon = document.getElementById('errorIcon');
+const loadingText = document.getElementById('loadingText');
+const loadingMessage = document.getElementById('loadingMessage');
+const errorContainer = document.getElementById('errorContainer');
+const errorMessage = document.getElementById('errorMessage');
+const retryButton = document.getElementById('retryButton');
+
 
 
 // BASIC CONF
 let currentSlide = 0;
 let refreshTime = 15 * 60 * 1000; // Minutes * Seconds * Milliseconds
 let slideDuration = 15000; // 15 seconds per slide
-let slideInterval, progressInterval;
+let slideInterval, progressInterval, refreshInterval;
 let isPaused = false;
 let inPresentation = false;
 
@@ -129,6 +140,12 @@ nextBtn.addEventListener('click', () => {
     startSlideshow();
 });
 
+retryButton.addEventListener('click', () => {
+    clearInterval(refreshInterval);
+    refreshInterval = setInterval(refresh,refreshTime);    
+    refresh();
+});
+
 // Keyboard navigation
 document.addEventListener('keydown', (e) => {
     if (!document.body.classList.contains('presentation-mode')) return;
@@ -153,7 +170,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 
-
 // Create Slide
 function createSlide(project) {
     // Create Slides
@@ -170,7 +186,7 @@ function createSlide(project) {
     const headerDiv1 = document.createElement('div');
     const projectTitle = document.createElement('h1');
     projectTitle.className = "text-3xl font-bold";
-    projectTitle.innerHTML = project.name;
+    projectTitle.textContent = project.name;
 
     const projectId = document.createElement('p');
     projectId.className = "text-lg opacity-80";
@@ -186,18 +202,18 @@ function createSlide(project) {
 
     const location = document.createElement('p');
     location.className = "text-sm opacity-70";
-    location.innerHTML = `Location: ${project.location}`;
+    location.textContent = `Location: ${project.location}`;
 
     const deadline = document.createElement('p');
     deadline.className = "text-sm opacity-70";
-    deadline.innerHTML = `Deadline: ${project.deadline}`;
+    deadline.textContent = `Deadline: ${project.deadline ? project.deadline : '--'}`;
 
     statusPanel.append(location, deadline);
 
     const status = document.createElement('div');
     
-    status.className = `status-badge bg-opacity-20 border ${project.status.trim() == 'On Track' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}`;
-    status.innerHTML = project.status;
+    status.className = `status-badge bg-opacity-20 border ${project.status.trim() == 'Ongoing' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}`;
+    status.textContent = project.status;
 
     headerDiv2.append(status, statusPanel);
 
@@ -365,7 +381,7 @@ function createSlide(project) {
     h2Title.textContent = "Project Activities";
     const pDescription = document.createElement('p')
     pDescription.className = 'text-sm opacity-70';
-    pDescription.textContent = project.description;
+    pDescription.textContent = project.description ? project.description : '--';
 
     tableTitle.append(h2Title, pDescription);
 
@@ -532,7 +548,7 @@ function createDashboard(dashboardData, projects) {
                 <h3 class="text-lg font-semibold">${project.name}</h3>
                 <p class="text-sm opacity-70">ID: ${project.id}</p>
             </div>
-            <div class="status-badge bg-opacity-20 border ${project.status.trim() == 'On Track' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}">${project.status}</div>  
+            <div class="status-badge bg-opacity-20 border ${project.status.trim() == 'Ongoing' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}">${project.status}</div>  
         </div>
 
         <div class="flex items-center justify-between mb-4">
@@ -544,7 +560,7 @@ function createDashboard(dashboardData, projects) {
             <div class="progress-ring-container">
                 <svg class="progress-ring" width="80" height="80">
                     <circle class="progress-ring-circle" id="progress-ring-1"
-                        stroke="${project.status.trim() == 'On Track' ? '#4ade80' : project.status.trim() == 'Completed' ? '#0078ff' : '#ef4444'}"
+                        stroke="${project.status.trim() == 'Ongoing' ? '#4ade80' : project.status.trim() == 'Completed' ? '#0078ff' : '#ef4444'}"
                         stroke-width="8"
                         fill="transparent"
                         r="32"
@@ -553,7 +569,7 @@ function createDashboard(dashboardData, projects) {
                         style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference - (parseInt(project.cards[0].value.slice(0,-1)) / 100) * circumference}; "
                         />
                 </svg>
-                <div class="progress-ring-text ${project.status.trim() == 'On Track' ? 'text-green-300' : project.status.trim() == 'Completed' ? 'text-blue-300 ' : 'text-red-300'}">${project.cards[0].value}</div>
+                <div class="progress-ring-text ${project.status.trim() == 'Ongoing' ? 'text-green-300' : project.status.trim() == 'Completed' ? 'text-blue-300 ' : 'text-red-300'}">${project.cards[0].value}</div>
             </div>
         </div>
         
@@ -564,7 +580,7 @@ function createDashboard(dashboardData, projects) {
                 <span>${project.cards[1].value}</span>
             </div>
             <div class="w-full bg-gray-700 rounded-full h-2">
-                <div class="${project.status.trim() == 'On Track' ? 'bg-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 ' : 'bg-red-500'} h-2 rounded-full" style="width:${percentage}%"></div>
+                <div class="${project.status.trim() == 'Ongoing' ? 'bg-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 ' : 'bg-red-500'} h-2 rounded-full" style="width:${percentage}%"></div>
             </div>
         </div>
 
@@ -667,7 +683,7 @@ function setProjectData(projects) {
             dashboardData.totalDone.push(project.charts.activityStatus[0]);
             dashboardData.totalActivities.push(project.charts.activities.length);
 
-            if (project.status == 'On Track') {
+            if (project.status == 'Ongoing') {
                 dashboardData.onTrack += 1;
             } else if (project.status == 'Completed') {
                 dashboardData.onComplete += 1;
@@ -693,15 +709,39 @@ function setProjectData(projects) {
 
 
 // Function to show loading screen
-function showLoading() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    const mainContent = document.getElementById('mainContent');
+function showLoading() {    
+    // Reset to loading state
+    loadingSpinner.classList.remove('hidden');
+    errorIcon.classList.add('hidden');
+    loadingText.textContent = 'Loading Data';
+    loadingText.classList.add('pulse');
+    loadingMessage.textContent = 'Please wait while we fetch the latest information...';
+    errorContainer.classList.add('hidden');
     
+    // Show loading screen
     loadingScreen.classList.remove('hidden');
     loadingScreen.classList.remove('fade-out');
     loadingScreen.classList.add('fade-in');
     
+    // Hide main content
     mainContent.classList.add('hidden');
+}
+
+function showLoadingError(msg) {    
+    // Switch to error state
+    loadingSpinner.classList.add('hidden');
+    errorIcon.classList.remove('hidden');
+    loadingText.textContent = 'Connection Error';
+    loadingText.classList.remove('pulse');
+    loadingMessage.textContent = '';
+    errorMessage.textContent = msg;
+    errorContainer.classList.remove('hidden');
+    
+    // Add shake animation to error icon
+    errorIcon.classList.add('shake');
+    setTimeout(() => {
+        errorIcon.classList.remove('shake');
+    }, 500);
 }
 
 // Function to hide loading screen
@@ -733,8 +773,7 @@ function fetchData() {
     })
     .withFailureHandler(error => {
         console.error(error)
-        hideLoading();
-        alert('Failed to load data. Please try again.');
+        showLoadingError(error.message);
     })
     .getDashboardData()
 }
@@ -761,6 +800,6 @@ function refresh() {
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchData();
-    setInterval(refresh,refreshTime);
+    refreshInterval = setInterval(refresh,refreshTime);
 });
 </script>
