@@ -12,13 +12,24 @@ const slidesContainer = document.getElementById('slidesContainer');
 let slides = new Array();
 let progressBars = new Array();
 
+// Loading Screen
+const loadingScreen = document.getElementById('loadingScreen');
+const mainContent = document.getElementById('mainContent');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const errorIcon = document.getElementById('errorIcon');
+const loadingText = document.getElementById('loadingText');
+const loadingMessage = document.getElementById('loadingMessage');
+const errorContainer = document.getElementById('errorContainer');
+const errorMessage = document.getElementById('errorMessage');
+const retryButton = document.getElementById('retryButton');
+
 
 
 // BASIC CONF
 let currentSlide = 0;
 let refreshTime = 15 * 60 * 1000; // Minutes * Seconds * Milliseconds
 let slideDuration = 15000; // 15 seconds per slide
-let slideInterval, progressInterval;
+let slideInterval, progressInterval, refreshInterval;
 let isPaused = false;
 let inPresentation = false;
 
@@ -129,6 +140,12 @@ nextBtn.addEventListener('click', () => {
     startSlideshow();
 });
 
+retryButton.addEventListener('click', () => {
+    clearInterval(refreshInterval);
+    refreshInterval = setInterval(refresh,refreshTime);    
+    refresh();
+});
+
 // Keyboard navigation
 document.addEventListener('keydown', (e) => {
     if (!document.body.classList.contains('presentation-mode')) return;
@@ -151,7 +168,6 @@ document.addEventListener('keydown', (e) => {
         resetProgress();
     }
 });
-
 
 
 // Create Slide
@@ -693,15 +709,39 @@ function setProjectData(projects) {
 
 
 // Function to show loading screen
-function showLoading() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    const mainContent = document.getElementById('mainContent');
+function showLoading() {    
+    // Reset to loading state
+    loadingSpinner.classList.remove('hidden');
+    errorIcon.classList.add('hidden');
+    loadingText.textContent = 'Loading Data';
+    loadingText.classList.add('pulse');
+    loadingMessage.textContent = 'Please wait while we fetch the latest information...';
+    errorContainer.classList.add('hidden');
     
+    // Show loading screen
     loadingScreen.classList.remove('hidden');
     loadingScreen.classList.remove('fade-out');
     loadingScreen.classList.add('fade-in');
     
+    // Hide main content
     mainContent.classList.add('hidden');
+}
+
+function showLoadingError(msg) {    
+    // Switch to error state
+    loadingSpinner.classList.add('hidden');
+    errorIcon.classList.remove('hidden');
+    loadingText.textContent = 'Connection Error';
+    loadingText.classList.remove('pulse');
+    loadingMessage.textContent = '';
+    errorMessage.textContent = msg;
+    errorContainer.classList.remove('hidden');
+    
+    // Add shake animation to error icon
+    errorIcon.classList.add('shake');
+    setTimeout(() => {
+        errorIcon.classList.remove('shake');
+    }, 500);
 }
 
 // Function to hide loading screen
@@ -719,7 +759,6 @@ function hideLoading() {
 }
 
 
-
 function fetchData() {
     showLoading();
 
@@ -735,8 +774,7 @@ function fetchData() {
     })
     .withFailureHandler(error => {
         console.error(error)
-        hideLoading();
-        alert('Failed to load data. Please try again.');
+        showLoadingError(error.message);
     })
     .getDashboardData()
 }
@@ -764,6 +802,6 @@ function refresh() {
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchData();
-    setInterval(refresh,refreshTime);
+    refreshInterval = setInterval(refresh,refreshTime);
 });
 </script>
