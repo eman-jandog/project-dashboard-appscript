@@ -69,12 +69,13 @@ function getDashboardData() {
   }
 }
 
-
 //Front-End Functions
 function include(filename) {
     return HtmlService.createTemplateFromFile(filename).evaluate().getContent()
 }
 
+// Default Appscript Functions
+// When Page load get the html file
 function doGet() {
     return HtmlService.createTemplateFromFile('templates/index')
         .evaluate()
@@ -83,11 +84,25 @@ function doGet() {
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
 }
 
+//Custom UI Custom Menu
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu('Dashboard')
+    .addItem('Report', 'report')
+    .addToUi();
+}
+
 //Custom Functions
 function report() {
-  var html = HtmlService.createHtmlOutputFromFile('templates/report_dialog')
+  const id = ScriptApp.getScriptId();
+  const webAppUrl = `https://script.google.com/macros/s/${id}/exec`
+  const template = HtmlService.createTemplateFromFile('templates/report_dialog');
+  template.webAppUrl = webAppUrl;
+
+  const html = template.evaluate()
     .setWidth(400) // Set dialog width
     .setHeight(300); // Set dialog height
+
   SpreadsheetApp.getUi().showModalDialog(html, 'Project Report');
 }
 

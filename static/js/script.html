@@ -202,11 +202,11 @@ function createSlide(project) {
 
     const location = document.createElement('p');
     location.className = "text-sm opacity-70";
-    location.innerHTML = project.location;
+    location.innerHTML = `Location: ${project.location}`;
 
     const deadline = document.createElement('p');
     deadline.className = "text-sm opacity-70";
-    deadline.innerHTML = project.deadline;
+    deadline.innerHTML = `Deadline: ${project.deadline}`;
 
     statusPanel.append(location, deadline);
 
@@ -457,7 +457,7 @@ function createDashboard(dashboardData, projects) {
     const projectComplete = document.getElementById('project-complete');
 
     // Header
-    updatedDate.textContent = `Last Updated: ${new Date().toISOString()}`;
+    updatedDate.textContent = `Last Updated: ${new Date().toLocaleString('en-ph', { year: 'numeric', month: 'long', day: 'numeric'})}`;
     projectCount.textContent = projectList.length == 1 ? `${projectList.length} Active Project` : `${projectList.length} Active Projects`;
 
     // Summary Stats
@@ -566,7 +566,7 @@ function createDashboard(dashboardData, projects) {
                         r="32"
                         cx="40"
                         cy="40"
-                        style="strokeDasharray:'${circumference} ${circumference}'; strokeDashoffset: '${circumference - (project.cards[0].value / 100) * circumference}';"
+                        style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference - (parseInt(project.cards[0].value.slice(0,-1)) / 100) * circumference}; "
                         />
                 </svg>
                 <div class="progress-ring-text ${project.status.trim() == 'On Track' ? 'text-green-300' : project.status.trim() == 'Completed' ? 'text-blue-300 ' : 'text-red-300'}">${project.cards[0].value}</div>
@@ -758,7 +758,6 @@ function hideLoading() {
     }, 1000);
 }
 
-
 function fetchData() {
     showLoading();
 
@@ -778,7 +777,6 @@ function fetchData() {
     })
     .getDashboardData()
 }
-
 
 function refresh() {
     // Clean before refreshing
