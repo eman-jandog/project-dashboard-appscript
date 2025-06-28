@@ -212,7 +212,7 @@ function createSlide(project) {
 
     const status = document.createElement('div');
     
-    status.className = `status-badge bg-opacity-20 border ${project.status.trim() == 'On Track' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}`;
+    status.className = `status-badge bg-opacity-20 border ${project.status.trim() == 'Ongoing' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}`;
     status.innerHTML = project.status;
 
     headerDiv2.append(status, statusPanel);
@@ -548,7 +548,7 @@ function createDashboard(dashboardData, projects) {
                 <h3 class="text-lg font-semibold">${project.name}</h3>
                 <p class="text-sm opacity-70">ID: ${project.id}</p>
             </div>
-            <div class="status-badge bg-opacity-20 border ${project.status.trim() == 'On Track' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}">${project.status}</div>  
+            <div class="status-badge bg-opacity-20 border ${project.status.trim() == 'Ongoing' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}">${project.status}</div>  
         </div>
 
         <div class="flex items-center justify-between mb-4">
@@ -560,7 +560,7 @@ function createDashboard(dashboardData, projects) {
             <div class="progress-ring-container">
                 <svg class="progress-ring" width="80" height="80">
                     <circle class="progress-ring-circle" id="progress-ring-1"
-                        stroke="${project.status.trim() == 'On Track' ? '#4ade80' : project.status.trim() == 'Completed' ? '#0078ff' : '#ef4444'}"
+                        stroke="${project.status.trim() == 'Ongoing' ? '#4ade80' : project.status.trim() == 'Completed' ? '#0078ff' : '#ef4444'}"
                         stroke-width="8"
                         fill="transparent"
                         r="32"
@@ -569,7 +569,7 @@ function createDashboard(dashboardData, projects) {
                         style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference - (parseInt(project.cards[0].value.slice(0,-1)) / 100) * circumference}; "
                         />
                 </svg>
-                <div class="progress-ring-text ${project.status.trim() == 'On Track' ? 'text-green-300' : project.status.trim() == 'Completed' ? 'text-blue-300 ' : 'text-red-300'}">${project.cards[0].value}</div>
+                <div class="progress-ring-text ${project.status.trim() == 'Ongoing' ? 'text-green-300' : project.status.trim() == 'Completed' ? 'text-blue-300 ' : 'text-red-300'}">${project.cards[0].value}</div>
             </div>
         </div>
         
@@ -580,7 +580,7 @@ function createDashboard(dashboardData, projects) {
                 <span>${project.cards[1].value}</span>
             </div>
             <div class="w-full bg-gray-700 rounded-full h-2">
-                <div class="${project.status.trim() == 'On Track' ? 'bg-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 ' : 'bg-red-500'} h-2 rounded-full" style="width:${percentage}%"></div>
+                <div class="${project.status.trim() == 'Ongoing' ? 'bg-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 ' : 'bg-red-500'} h-2 rounded-full" style="width:${percentage}%"></div>
             </div>
         </div>
 
@@ -683,7 +683,7 @@ function setProjectData(projects) {
             dashboardData.totalDone.push(project.charts.activityStatus[0]);
             dashboardData.totalActivities.push(project.charts.activities.length);
 
-            if (project.status == 'On Track') {
+            if (project.status == 'Ongoing') {
                 dashboardData.onTrack += 1;
             } else if (project.status == 'Completed') {
                 dashboardData.onComplete += 1;
