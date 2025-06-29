@@ -20,8 +20,8 @@ class App {
         const location = sheet.getRange('D4').getValue();
         const status = sheet.getRange('D5').getValue();
 
-        if (!name || !id || !location || !status) {
-          throw new Error(`Missing basic information in sheet ${sheetName}`);
+        if (!name || !description || !id || !location || !status) {
+          throw new Error(`Missing information in sheet ${sheetName}`);
         }
 
         const pt = sheet.getDataRange().getValues();
@@ -79,7 +79,7 @@ function include(filename) {
 function doGet() {
     return HtmlService.createTemplateFromFile('templates/index')
         .evaluate()
-        .setTitle("Project Dashboard")
+        .setTitle("ARAC Project Dashboard")
         .addMetaTag("viewport", "width=device-width, initial-scale=1.0")
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
 }
@@ -94,8 +94,8 @@ function onOpen() {
 
 //Custom Functions
 function report() {
-  const id = ScriptApp.getScriptId();
-  const webAppUrl = `https://script.google.com/macros/s/${id}/exec`
+  const deploymentId = PropertiesService.getScriptProperties().getProperty('deploymentId');
+  const webAppUrl = `https://script.google.com/macros/s/${deploymentId}/exec`;
   const template = HtmlService.createTemplateFromFile('templates/report_dialog');
   template.webAppUrl = webAppUrl;
 

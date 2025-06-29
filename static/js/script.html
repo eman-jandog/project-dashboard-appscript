@@ -186,7 +186,7 @@ function createSlide(project) {
     const headerDiv1 = document.createElement('div');
     const projectTitle = document.createElement('h1');
     projectTitle.className = "text-3xl font-bold";
-    projectTitle.textContent = project.name;
+    projectTitle.innerHTML = project.name;
 
     const projectId = document.createElement('p');
     projectId.className = "text-lg opacity-80";
@@ -202,18 +202,18 @@ function createSlide(project) {
 
     const location = document.createElement('p');
     location.className = "text-sm opacity-70";
-    location.textContent = `Location: ${project.location}`;
+    location.innerHTML = `Location: ${project.location}`;
 
     const deadline = document.createElement('p');
     deadline.className = "text-sm opacity-70";
-    deadline.textContent = `Deadline: ${project.deadline ? project.deadline : '--'}`;
+    deadline.innerHTML = `Deadline: ${project.deadline}`;
 
     statusPanel.append(location, deadline);
 
     const status = document.createElement('div');
     
     status.className = `status-badge bg-opacity-20 border ${project.status.trim() == 'Ongoing' ? 'bg-green-500 text-green-300 border-green-500' : project.status.trim() == 'Completed' ? 'bg-blue-500 text-blue-300 border-blue-500' : 'bg-red-500 text-red-300 border-red-500'}`;
-    status.textContent = project.status;
+    status.innerHTML = project.status;
 
     headerDiv2.append(status, statusPanel);
 
@@ -381,7 +381,7 @@ function createSlide(project) {
     h2Title.textContent = "Project Activities";
     const pDescription = document.createElement('p')
     pDescription.className = 'text-sm opacity-70';
-    pDescription.textContent = project.description ? project.description : '--';
+    pDescription.textContent = project.description;
 
     tableTitle.append(h2Title, pDescription);
 
