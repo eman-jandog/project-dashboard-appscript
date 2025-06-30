@@ -18,7 +18,7 @@ Follow the below steps to create a copy of your own.
 ![dbsheet](https://github.com/user-attachments/assets/06cbb243-71aa-405e-b81f-e9cff4180d26)
 
 4. You can get the sheet id in the url.
-![id](https://github.com/user-attachments/assets/4947dfa9-f9bd-4340-9665-07d4b8fe8321)
+![id](https://github.com/user-attachments/assets/3ce677e8-d4be-4a56-b6f8-7b7e4d1a05a6)
 
 5. Then, deploy by clicking 'New Deployment'. You can leave everything by default or explore each later.
 ![deployment](https://github.com/user-attachments/assets/f8723cae-7ca8-43e4-bc57-ce0defb58a12)
