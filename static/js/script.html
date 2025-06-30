@@ -393,7 +393,6 @@ function createSlide(project) {
     const rowHeaders = document.createElement('tr');
     project.table.headers.forEach((header, ind, headers) => {
         if (ind >= headers.length-2) return null;
-        const match = header.indexOf('(');
         let tableHeader = document.createElement('th');
         tableHeader.className = 'text-center max-w-[132px]';
         tableHeader.innerHTML = header;
@@ -403,16 +402,19 @@ function createSlide(project) {
     thead.appendChild(rowHeaders);
 
     const tbody = document.createElement('tbody');
-    project.table.values.forEach((row, i) => {
-        if (i >= row.length-1) return;
+    if(project.name == 'Draft') {
+      console.log(project.table.values)
+    }
+    project.table.values.forEach((row, i, self) => {
+        if (i >= self.length-1) return;
         const rowTable = document.createElement('tr');
         rowTable.className = 'hover:bg-white hover:bg-opacity-10';
         row.forEach((data, j) => {
-            if (j >= row.length-2) return;
-            const rowValue = document.createElement('td');
-            if (j!=0) rowValue.classList.add('text-right')
-            rowValue.textContent = data;
-            rowTable.appendChild(rowValue);
+          if (j >= row.length-2) return;
+          const rowValue = document.createElement('td');
+          if (j!=0) rowValue.classList.add('text-right')
+          rowValue.textContent = data ? data : "-";
+          rowTable.appendChild(rowValue);
         })
         tbody.appendChild(rowTable);
     })    
@@ -555,7 +557,7 @@ function createDashboard(dashboardData, projects) {
             <div>
                 <p class="text-sm opacity-70">Location: ${project.location}</p>
                 <p class="text-sm opacity-70">Deadline: ${project.deadline}</p>
-                <p class="text-sm opacity-70">Days Left: ${project.cards[2].value}}</p>
+                <p class="text-sm opacity-70">Days Left: ${project.cards[2].value}</p>
             </div>
             <div class="progress-ring-container">
                 <svg class="progress-ring" width="80" height="80">
@@ -630,8 +632,8 @@ function setProjectData(projects) {
 
             // Formating Activities and Status related data : GENERAL
             // Set Slide Charts Data
-            projectValues.forEach((row, i) => {
-                if (i > row.length-1) return;
+            projectValues.forEach((row, i, self) => {
+                if (i >= self.length-1) return;
                 project.charts.activities ? project.charts.activities.push(row[0]) : project.charts.activities = [row[0]];
 
                 project.charts.targets ? project.charts.targets.push(row[row.length-1]) : project.charts.targets = [row[row.length-1]];

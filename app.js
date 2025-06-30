@@ -26,16 +26,23 @@ class App {
 
         const pt = sheet.getDataRange().getValues();
         const headers = [];
-        for (const cell of pt[6]) {
-          if (cell == "-") break
-          else headers.push(cell);
-        }
-
-        const values = []
-        for (let i=7; i<pt.length; i++) {
-          const row = pt[i];
-          if (!row[0]) continue;
-          values.push(row.filter((item,i) => i < headers.length))
+        const values = [];
+        
+        const _headers = pt[6];
+        for (let r=0; r<_headers.length; r++) {
+          if (_headers[r] == "-") break;
+          if (!_headers[r]) continue;
+          
+          headers.push(_headers[r]);
+          let skip = 0;
+          for (let i=7; i<pt.length; i++) {
+            const row = pt[i];
+            if (!row[0]) {
+              skip++;
+              continue;
+            }
+            values[i-7-skip] ? values[i-7-skip].push(row[r]) : values[i-7-skip] = [row[r]];
+          }           
         }
 
         const sheetData = {
@@ -51,6 +58,7 @@ class App {
           }
         }
 
+        console.log(sheetData.table.values)
         projects.push(sheetData);
       }
 
