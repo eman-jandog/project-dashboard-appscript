@@ -12,6 +12,22 @@
       text-align: center;
       box-sizing: border-box;
       overflow: hidden;
+      
+    }
+
+    /** dialog animation **/
+
+    @keyframes onLoad {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .container {
+      animation: onLoad 0.5s ease-out;
     }
 
     .dialog {
@@ -24,6 +40,8 @@
       padding: 30px 30px 50px;
     }
 
+    
+
     .dialog img {
       flex: 1;
       max-width: 150px;
@@ -32,6 +50,48 @@
     .dialog a {
       width: 100%;
     }
+
+    .disabled-modal {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      width: 280px;
+      height: auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0px 1px 9px 0px;
+    }
+
+    .disabled-modal.show {
+      display: flex;
+      animation: showing 0.3s ease-out;
+
+    }
+
+    .disabled-modal img {
+      max-width: 80px;
+      margin-bottom: 5px;
+    }
+
+    @keyframes showing {
+      0% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.5;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+
   </style>
 
 </head>
@@ -40,9 +100,20 @@
     <div class="dialog" id="reportDialog">
       <img src="https://cdn-icons-png.flaticon.com/512/9823/9823663.png" alt="dashboard-img" /> 
       <p>By clicking the button, you will be directed to the report page. Press <b>F11</b> for full screen</p>
-      <a class="btn btn-primary" href="<?!= webAppUrl ?>" target="_blank" role="button">Click here</a>
-    </div>
+      <a class="btn btn-primary" onclick="showPopup()" role="button">Click here</a>
+    </div>  
+
+    <div class="disabled-modal" id="popup">
+      <img src="https://cdn-icons-png.flaticon.com/512/595/595067.png" alt="alert-img" /> 
+      <p>Currently disabled. Please contact the administrator.</p>
+    </div> 
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script>
+    function showPopup() {
+      const popup = document.getElementById('popup');
+      popup.classList.add('show');
+    }
+  </script>
 </body>
 </html>
