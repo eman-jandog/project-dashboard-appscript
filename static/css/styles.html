@@ -78,6 +78,19 @@ th {
     overflow-y: auto;
 }
 
+.table-container.full {
+  max-height: 100vh;
+}
+
+.btn-table {
+  transition: all 0.5s ease-in;
+  cursor: pointer;
+}
+
+.btn-table:hover {
+  scale: 1.2;
+}
+
 .controls {
     position: fixed;
     bottom: 20px;
@@ -242,6 +255,10 @@ body.presentation-mode .exit-presentation {
 
 body.presentation-mode .presentation-toggle {
     display: none;
+}
+
+.hidden {
+  display: none !important;
 }
 
 .exit-presentation:hover {

@@ -32,6 +32,8 @@ let slideDuration = 15000; // 15 seconds per slide
 let slideInterval, progressInterval, refreshInterval;
 let isPaused = false;
 let inPresentation = false;
+let slideId = 0;
+const slideViewTracker = {}
 
 
 
@@ -169,12 +171,43 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// Full-Screen slide
+slidesContainer.addEventListener('click', (e) => {
+  if (e.target.closest('.btn-table') || e.target.classList.contains('btn-table')) {
+    let slide = e.target.closest('.slide');
+    let table = slide.querySelector('.table-container');
+    let gridSection = slide.querySelectorAll('.grid');
+    let svg = slide.querySelector('svg');
+    let id = slide.dataset.id
+
+    if (slideViewTracker[id]) {   
+      gridSection.forEach(grid => {
+        grid.classList.remove('hidden');
+      })
+
+      table.classList.remove('full');
+      svg.innerHTML = '<g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M17 7H14M17 7V10M17 7L13.5 10.5M7 17H10M7 17V14M7 17L10.5 13.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M7 7H10M7 7V10M7 7L10.5 10.5M17 17H14M17 17V14M17 17L13.5 13.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"></path> </g>'
+      slideViewTracker[id] = false;
+      return;  
+    }
+
+    gridSection.forEach(grid => {
+      grid.classList.add('hidden')
+    })
+    table.classList.add('full');
+    svg.innerHTML = '<g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20 4L14 10M14 10H17.75M14 10V6.25" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L10 14M10 14H6.25M10 14V17.75" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"></path> </g>'
+
+    slideViewTracker[id] = true;
+  }
+})
+
 
 // Create Slide
 function createSlide(project) {
     // Create Slides
     const slide = document.createElement('div')
     slide.classList.add("slide")
+    slide.setAttribute('data-id', ++slideId)
 
     const outerDiv = document.createElement('div')
     outerDiv.className = 'min-h-screen p-6';
@@ -379,11 +412,14 @@ function createSlide(project) {
     const h2Title = document.createElement('h2');
     h2Title.className = 'text-lg font-semibold';
     h2Title.textContent = "Project Activities";
-    const pDescription = document.createElement('p')
-    pDescription.className = 'text-sm opacity-70';
-    pDescription.textContent = project.description;
 
-    tableTitle.append(h2Title, pDescription);
+    const divDescription = document.createElement('div')
+    divDescription.className = 'flex gap-2'
+    divDescription.innerHTML = `
+    <p class='text-sm opacity-70'>${project.description.slice(0,55)}</p>
+    <svg id="showTable" class="btn-table size-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M17 7H14M17 7V10M17 7L13.5 10.5M7 17H10M7 17V14M7 17L10.5 13.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M7 7H10M7 7V10M7 7L10.5 10.5M17 17H14M17 17V14M17 17L13.5 13.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"></path> </g></svg>`    
+
+    tableTitle.append(h2Title, divDescription);
 
     const tableDiv = document.createElement('div');
     tableDiv.classList.add('table-container');
@@ -402,9 +438,6 @@ function createSlide(project) {
     thead.appendChild(rowHeaders);
 
     const tbody = document.createElement('tbody');
-    if(project.name == 'Draft') {
-      console.log(project.table.values)
-    }
     project.table.values.forEach((row, i, self) => {
         if (i >= self.length-1) return;
         const rowTable = document.createElement('tr');
