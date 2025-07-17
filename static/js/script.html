@@ -630,6 +630,9 @@ function createDashboard(dashboardData, projects) {
             e.preventDefault();
             if(e.target.classList.contains('view-details-btn') || e.target.closest('.view-details-btn')) {
                 document.body.classList.add('presentation-mode');
+                window.scrollTo({
+                  top: 0
+                })
                 goToSlide(i);
                 startSlideshow();
                 inPresentation = true;

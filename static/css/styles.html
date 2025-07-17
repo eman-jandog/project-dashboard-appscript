@@ -1,19 +1,21 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
+body::-webkit-scrollbar {
+  display: none;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f0f4f8;
-}
+    height: 100%;
+    width: 100%;
+  }
 
 .slide {
     opacity: 1;
     transition: opacity 0.8s ease-in-out;
     display: none;
-}
-
-body.presentation-mode {
-    overflow: hidden;
 }
 
 body.presentation-mode .slide {
@@ -32,7 +34,7 @@ body.presentation-mode .overview-container {
 .progress-bar {
     height: 4px;
     background-color: rgba(255, 255, 255, 0.3);
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
@@ -269,7 +271,6 @@ body.presentation-mode .presentation-toggle {
 
 .project-card {
     transition: all 0.3s ease;
-    cursor: pointer;
 }
 
 .project-card:hover {
@@ -352,4 +353,5 @@ body.presentation-mode .presentation-toggle {
     30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
     40%, 60% { transform: translate3d(4px, 0, 0); }
 }
+
 </style>
