@@ -87,7 +87,7 @@ function include(filename) {
 function doGet() {
     return HtmlService.createTemplateFromFile('templates/index')
         .evaluate()
-        .setTitle("ARAC Project Dashboard")
+        .setTitle("Project Dashboard")
         .addMetaTag("viewport", "width=device-width, initial-scale=1.0")
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
 }
