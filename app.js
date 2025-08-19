@@ -95,7 +95,7 @@ function doGet() {
 //Custom UI Custom Menu
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu('ARAC')
+  ui.createMenu('Dashboard')
     .addItem('Report', 'report')
     .addToUi();
 }
