@@ -3,7 +3,7 @@ Is a data visualization webapp built using google sheet and appscript.
 
 ![slide_1](https://github.com/user-attachments/assets/fe70b7f4-ca24-40cc-9fc2-20ae6bb1a8c9)
 
-> Click to view the sample [project](https://script.google.com/macros/s/AKfycbwuud2KUUImPGFGAZjeo5SXfIopltZh3Pj2jQpSwAN7Lm7glkbGqLvXbdhUc3AOtKkbYA/exec) and [sheet](https://docs.google.com/spreadsheets/d/1nJ77vTuO7kM8OFqCXL3l3PPfcRcXdpGWrU7nz-G-xWo/edit?usp=sharing).
+> Click to view the sample [project](https://script.google.com/macros/s/AKfycbyWlAh8Z-qjGvpZvXqfMhPMKuzluwNYQoJd2510ymXLK373XNeQphVgTn9i0GaQ1rR8vw/exec) and [sheet](https://docs.google.com/spreadsheets/d/1nJ77vTuO7kM8OFqCXL3l3PPfcRcXdpGWrU7nz-G-xWo/edit?usp=sharing).
 
 ## Create Your Own Copy
 Follow the below steps to create a copy of your own.
